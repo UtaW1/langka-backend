@@ -3,10 +3,16 @@ defmodule LangkaOrderManagementWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+    plug LangkaOrderManagementWeb.AuthPlug
   end
 
-  scope "/api", LangkaOrderManagementWeb do
+  scope "/api/user", LangkaOrderManagementWeb do
     pipe_through :api
+
+    post "/register", AuthController, :register
+    post "/login", AuthController, :login
+    post "/logout", AuthController, :logout
+    post "/refresh", AuthController, :refresh
   end
 
   # Enable Swoosh mailbox preview in development

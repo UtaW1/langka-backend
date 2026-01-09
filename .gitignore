@@ -25,3 +25,8 @@ erl_crash.dump
 # Ignore package tarball (built via "mix hex.build").
 langka_order_management-*.tar
 
+/secrets
+/logs
+*.pem
+.env
+

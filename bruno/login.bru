@@ -1,0 +1,16 @@
+meta {
+  name: login
+  type: http
+  seq: 3
+}
+
+post {
+  url: http://localhost:4000/api/user/login
+  body: multipartForm
+  auth: none
+}
+
+body:multipart-form {
+  phone_number: 098221500
+  password: bobbyboy123
+}

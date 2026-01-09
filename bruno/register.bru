@@ -1,0 +1,18 @@
+meta {
+  name: register
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:4000/api/user/register
+  body: multipartForm
+  auth: none
+}
+
+body:multipart-form {
+  phone_number: 098221500
+  password: bobbyboy123
+  role: user
+  username: jimmar
+}

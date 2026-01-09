@@ -11,5 +11,7 @@ defmodule LangkaOrderManagement.Repo.Migrations.CreateUsersTable do
 
       timestamps()
     end
+
+    create unique_index(:users, [:phone_number])
   end
 end
