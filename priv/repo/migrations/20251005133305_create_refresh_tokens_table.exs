@@ -11,6 +11,8 @@ defmodule LangkaOrderManagement.Repo.Migrations.CreateRefreshTokensTable do
       add :revoked_datetime, :utc_datetime
       add :session_id, :string, null: false
       add :user_id, references(:users, on_delete: :delete_all, type: :binary_id), null: false
+
+      timestamps(updated_at: false)
     end
 
     create index(:refresh_tokens, [:user_id, :session_id])

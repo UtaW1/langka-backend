@@ -15,6 +15,8 @@ defmodule LangkaOrderManagement.Account.RefreshToken do
     field :session_id, :string
 
     belongs_to :user, User, type: :binary_id
+
+    timestamps(updated_at: false)
   end
 
   def changeset(refresh_token, attrs) do

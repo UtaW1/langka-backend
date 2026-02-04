@@ -1,0 +1,28 @@
+defmodule LangkaOrderManagement.Product.Product do
+  use Ecto.Schema
+  import Ecto.Changeset
+
+  alias LangkaOrderManagement.Product.{ProductCategory, ProductPrice}
+  alias LangkaOrderManagement.Account.Transaction
+
+  schema "products" do
+    field :name, :string
+    field :removed_datetime, :utc_datetime
+    field :code, :string
+
+    belongs_to :product_category, ProductCategory
+
+    has_many :product_prices, ProductPrice
+
+    many_to_many :transactions, Transaction, join_through: "products_transactions"
+
+    timestamps()
+  end
+
+  def changeset(product, attrs) do
+    product
+    |> cast(attrs, [:name, :code, :product_category_id])
+    |> validate_required([:name, :product_category_id])
+    |> foreign_key_constraint(:product_category_id)
+  end
+end
