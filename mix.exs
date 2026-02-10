@@ -41,12 +41,14 @@ defmodule LangkaOrderManagement.MixProject do
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
       {:gettext, "~> 0.26"},
-      {:jason, "~> 1.2"},
+      {:jason, "~> 1.1"},
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
       {:cors_plug, "~> 3.0"},
       {:argon2_elixir, "~> 3.0"},
-      {:joken, "~> 2.0"}
+      {:joken, "~> 2.0"},
+      {:validate, "~> 1.3"},
+      {:nadia, "~> 0.7.0"}
     ]
   end
 

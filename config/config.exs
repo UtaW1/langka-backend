@@ -43,6 +43,12 @@ config :cors_plug,
   headers: ["x-api-key"],
   expose: ["x-paging-total-count"]
 
+config :langka_order_management, :telegram_integration,
+  channel_id: System.get_env("TELEGRAM_CHANNEL_ID")
+
+config :langka_order_management, :nadia,
+  token: System.get_env("TELEGRAM_BOT_TOKEN")
+
 config :langka_order_management, LangkaOrderManagement.Auth,
   jwt_alg: "RS256",
   private_key: System.get_env("JWT_PRIVATE_KEY"),

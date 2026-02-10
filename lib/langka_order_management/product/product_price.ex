@@ -9,7 +9,7 @@ defmodule LangkaOrderManagement.Product.ProductPrice do
 
     belongs_to :product, Product
 
-    timestamps()
+    timestamps(updated_at: false)
   end
 
   def changeset(product_price, attrs) do

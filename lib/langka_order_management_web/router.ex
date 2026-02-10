@@ -1,5 +1,6 @@
 defmodule LangkaOrderManagementWeb.Router do
   use LangkaOrderManagementWeb, :router
+  alias LangkaOrderManagementWeb.FormRequest
 
   pipeline :api do
     plug :accepts, ["json"]
@@ -21,11 +22,31 @@ defmodule LangkaOrderManagementWeb.Router do
     post "/logout", AuthController, :logout
   end
 
-  scope "/api", LangkaOrderManagementWeb do
+  scope "/api/auth", LangkaOrderManagementWeb do
     pipe_through :api
 
     post "/register", AuthController, :register
     post "/login", AuthController, :login
+  end
+
+  scope "/telegram_integration" do
+    pipe_through :api
+
+    post "/webhook_handler", FormRequest, LangkaOrderManagementWeb.TelegramWebhook
+  end
+
+  scope "/api" do
+    pipe_through :api
+
+    scope "/products" do
+      get "/", FormRequest, LangkaOrderManagementWeb.ListProduct
+      post "/", FormRequest, LangkaOrderManagementWeb.CreateProduct
+
+      post "/category", FormRequest, LangkaOrderManagementWeb.CreateCategory
+      get "/category", FormRequest, LangkaOrderManagementWeb.ListProductCategory
+    end
+
+    post "/order", FormRequest, LangkaOrderManagementWeb.MakePendingOrder
   end
 
   # Enable Swoosh mailbox preview in development

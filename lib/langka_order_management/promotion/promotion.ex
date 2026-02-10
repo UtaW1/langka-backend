@@ -22,7 +22,7 @@ defmodule LangkaOrderManagement.Promotion.Promotion do
 
   def retire_changeset(promotion, attrs) do
     promotion
-    |> cast(attrs, [:status])
+    |> cast(attrs, [:status, :removed_datetime])
     |> validate_inclusion(:status, ["retired"])
   end
 end

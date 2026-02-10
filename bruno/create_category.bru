@@ -1,0 +1,18 @@
+meta {
+  name: create_category
+  type: http
+  seq: 6
+}
+
+post {
+  url: http://localhost:4000/api/products/category
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "dessert", 
+    "description": "dessert related items"
+  }
+}

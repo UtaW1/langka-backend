@@ -119,16 +119,10 @@ if config_env() == :prod do
     jwt_alg: "RS256",
     private_key: System.fetch_env!("JWT_PRIVATE_KEY"),
     public_key: System.fetch_env!("JWT_PUBLIC_KEY")
-end
 
-# config/runtime.exs
-if config_env() in [:dev, :prod] do
-  private_key = System.get_env("JWT_PRIVATE_KEY")
+  config :langka_order_management, :telegram_integration,
+    channel_id: System.get_env("TELEGRAM_CHANNEL_ID")
 
-  public_key = System.get_env("JWT_PUBLIC_KEY")
-
-  config :langka_order_management, LangkaOrderManagement.Auth,
-    jwt_alg: "RS256",
-    private_key: private_key,
-    public_key: public_key
+  config :nadia,
+    token: System.get_env("TELEGRAM_BOT_TOKEN")
 end

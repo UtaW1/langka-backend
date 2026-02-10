@@ -10,6 +10,9 @@ defmodule LangkaOrderManagement.Product.ProductCategory do
 
     has_many :products, Product
 
+    field :removed_datetime, :utc_datetime
+    field :removed_reason, :string
+
     timestamps()
   end
 
