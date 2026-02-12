@@ -8,6 +8,7 @@ defmodule LangkaOrderManagement.Application do
   @impl true
   def start(_type, _args) do
     children = [
+      {Finch, name: FinchHttpClient},
       LangkaOrderManagementWeb.Telemetry,
       LangkaOrderManagement.Repo,
       {DNSCluster, query: Application.get_env(:langka_order_management, :dns_cluster_query) || :ignore},

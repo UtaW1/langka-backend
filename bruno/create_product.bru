@@ -6,6 +6,15 @@ meta {
 
 post {
   url: http://localhost:4000/api/products
-  body: none
+  body: json
   auth: none
+}
+
+body:json {
+  {
+    "name": "spaghetti",
+    "code": null, 
+    "product_category_id": 1, 
+    "price_as_usd": 4.5
+  }
 }

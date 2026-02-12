@@ -48,7 +48,10 @@ defmodule LangkaOrderManagement.MixProject do
       {:argon2_elixir, "~> 3.0"},
       {:joken, "~> 2.0"},
       {:validate, "~> 1.3"},
-      {:nadia, "~> 0.7.0"}
+      {:nadia, "~> 0.7.0"},
+      {:elixlsx, "~> 0.6.0"},
+      {:xlsx_reader, "~> 0.8.0"},
+      {:tesla, "~> 1.9"}
     ]
   end
 

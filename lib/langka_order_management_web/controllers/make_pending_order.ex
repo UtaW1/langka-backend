@@ -4,8 +4,18 @@ defmodule LangkaOrderManagementWeb.MakePendingOrder do
   def rules(_) do
     %{
       "user_id" => [required: false, nullable: true, type: :string],
-      "products_orders" => [required: true, nullable: false, type: :map, cast: :map],
-      "invoice_id" => [required: false, nullable: true, type: :string]
+      "products_orders" => [required: true, nullable: false, type: :list,
+        list: [
+          required: true,
+          type: :map,
+          map: %{
+            "product_id" => [required: true, type: :integer, cast: :integer, min: 1],
+            "quantity" => [required: true, cast: :integer, type: :integer, min: 1]
+          }
+        ]
+      ],
+      "invoice_id" => [required: false, nullable: true, type: :string],
+      "table_number" => [required: true, nullable: false, cast: :string, type: :string]
     }
   end
 

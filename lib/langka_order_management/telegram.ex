@@ -6,9 +6,7 @@ defmodule LangkaOrderManagement.Telegram do
   end
 
   def telegram_token() do
-    :langka_order_management
-    |> Application.get_env(:nadia)
-    |> Keyword.get(:token)
+    Application.get_env(:nadia, :token)
   end
 
   def send_order_payload_to_channel(user_id, transaction, products_orders) do

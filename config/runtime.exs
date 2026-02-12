@@ -124,5 +124,10 @@ if config_env() == :prod do
     channel_id: System.get_env("TELEGRAM_CHANNEL_ID")
 
   config :nadia,
-    token: System.get_env("TELEGRAM_BOT_TOKEN")
+    token: System.get_env("TELEGRAM_BOT_TOKEN"),
+    base_url: System.get_env("TELEGRAM_API_BASE_URL")
+
+  config :langka_order_management, :supabase,
+    server_url: System.get_env("SUPABASE_SERVER_URL"),
+    api_key: System.get_env("SUPABASE_API_KEY")
 end

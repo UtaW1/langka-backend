@@ -84,6 +84,8 @@ defmodule LangkaOrderManagement.Product do
   # Product Prices
   # ─────────────────────────────
   def list_products_with_paging(filters) do
+    filters = Map.put(filters, "is_load_latest_price", true)
+
     product_query =
       Product
       |> from(as: :product)
@@ -110,6 +112,7 @@ defmodule LangkaOrderManagement.Product do
       |> select([p], count(fragment("DISTINCT ?", p.id)))
       |> Repo.one()
     }
+    |> IO.inspect()
   end
 
   def list_product_categories_with_paging(filters) do
@@ -201,6 +204,10 @@ defmodule LangkaOrderManagement.Product do
     |> join(:left_lateral, [], subquery(last_price_subquery), on: true, as: :pp)
     |> where([p], p.id in ^product_ids)
     |> preload([p], :product_category)
+    |> select([p, pp], %{
+      p |
+      latest_product_price: pp.price_as_usd
+    })
     |> Repo.all()
   end
 

@@ -10,9 +10,32 @@ defmodule LangkaOrderManagement.Account do
     Promotion.UserPromotionTracker,
     Payment,
     Account.Transaction,
-    Product.ProductTransaction
+    Product.ProductTransaction,
+    ContextUtil
   }
   import Ecto.Query
+
+  def list_all_transactions(filters) do
+    Transaction
+    |> where([t], t.status == ^"completed")
+    |> ContextUtil.list(filters)
+    |> preload([t], :products)
+    |> Repo.all()
+  end
+
+  def list_transactions_for_export(args) do
+    Transaction
+    |> where([t], t.status == ^"completed")
+    |> where([t], type(t.inserted_at, :date) >= ^args["start_date"] and type(t.inserted_at, :date) <= ^args["end_date"])
+    |> preload([t], :products)
+    |> Repo.all()
+    |> Enum.map(& %{
+      id: &1.id,
+      price: &1.bill_price_as_usd,
+      user_id: &1.user_id,
+      promotion_id: &1.promotion_apply_id
+    })
+  end
 
   def get_user_by_id(id) do
     User
@@ -48,8 +71,9 @@ defmodule LangkaOrderManagement.Account do
     {final_price, enriched_products_orders, _discount_amount} = Payment.calculate_final_price(products_orders, nil)
 
     args = %{
-      status: :pending,
+      status: "pending",
       invoice_id: args["invoice_id"],
+      table_number: args["table_number"],
       bill_price_as_usd: final_price,
       user_id: nil,
       promotion_apply_id: nil
@@ -60,9 +84,10 @@ defmodule LangkaOrderManagement.Account do
     |> Ecto.Multi.insert(:pending_transaction, Transaction.changeset(%Transaction{}, args))
     |> Ecto.Multi.insert_all(:transaction_product, ProductTransaction, fn %{pending_transaction: transaction} ->
       Enum.map(products_orders, & %{
-        product_id: &1.product_id,
+        product_id: &1["product_id"],
         transaction_id: transaction.id,
-        quantity: &1.quantity
+        quantity: &1["quantity"],
+        inserted_at: NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
       })
     end)
     |> Repo.transact()
@@ -104,6 +129,7 @@ defmodule LangkaOrderManagement.Account do
     args = %{
       status: :pending,
       invoice_id: args["invoice_id"],
+      table_number: args["table_number"],
       bill_price_as_usd: final_price,
       user_id: user_id,
       promotion_apply_id:

@@ -17,7 +17,7 @@ defmodule LangkaOrderManagement.Payment do
   def use_promotion_if_applicable(grand_total_price_as_usd, _), do: {grand_total_price_as_usd, nil}
 
   def calculate_final_price(products_orders, promotion_apply) do
-    product_ids = Enum.map(products_orders, & &1["id"])
+    product_ids = Enum.map(products_orders, & &1["product_id"])
 
     product_with_prices = Product.get_product_with_latest_price(product_ids)
 
@@ -27,12 +27,12 @@ defmodule LangkaOrderManagement.Payment do
 
     products_orders =
       Enum.map(products_orders, fn product_order ->
-        product_id = product_order["id"]
+        product_id = product_order["product_id"]
         quantity = product_order["quantity"]
 
         enriched_product = Map.get(products_by_id, product_id)
 
-        product_price = enriched_product.pp.price_as_usd
+        product_price = enriched_product.latest_product_price
 
         total_price_as_usd =
           cond do

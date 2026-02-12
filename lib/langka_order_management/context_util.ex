@@ -3,6 +3,57 @@ defmodule LangkaOrderManagement.ContextUtil do
 
   import Ecto.Query, warn: false
 
+  def construct_csv_content_for_export(%{columns: columns, rows: rows}, header, params) do
+    start_date =
+      if params["start_date"] do
+        Map.get(params, "start_date", "none")
+      else
+        Map.get(params, "start_datetime", "none")
+      end
+
+    end_date =
+      if params["end_date"] do
+        Map.get(params, "end_date", "none")
+      else
+        Map.get(params, "end_datetime", "none")
+      end
+
+    dir = Map.get(params, "dir", "#{String.replace(header, " ", "-")}.xlsx")
+
+        string_columns = Enum.map(columns, fn col ->
+      case col do
+        col when is_atom(col) -> Atom.to_string(col)
+        col -> col
+      end
+    end)
+
+    metadata_rows = [
+      [header] ++ List.duplicate("", length(columns) - 1),
+      ["Generated on: #{Date.utc_today()}"] ++ List.duplicate("", length(columns) - 1),
+      ["From #{start_date} To #{end_date}"] ++ List.duplicate("", length(columns) - 1),
+      List.duplicate("", length(columns))
+    ]
+
+    data_rows = Enum.map(rows, fn row ->
+      Enum.map(columns, fn col ->
+        "#{Map.get(row, col, "")}"
+      end)
+    end)
+
+    all_rows = metadata_rows ++ [string_columns] ++ data_rows
+
+    sheet = %Elixlsx.Sheet{
+      name: "Exported Data",
+      rows: all_rows
+    }
+
+    workbook = %Elixlsx.Workbook{sheets: [sheet]}
+
+    {:ok, {_file_path, binary}} = Elixlsx.write_to_memory(workbook, dir)
+
+    binary
+  end
+
   def list(query, filters) do
     limit = get_record_listing_limit(filters)
 

@@ -1,0 +1,24 @@
+meta {
+  name: make_pending_order
+  type: http
+  seq: 9
+}
+
+post {
+  url: http://localhost:4000/api/order
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "products_orders": 
+    [
+      {
+        "product_id": 1, 
+        "quantity": 1
+      }
+    ], 
+    "table_number": "T01"
+  }
+}

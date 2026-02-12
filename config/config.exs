@@ -31,6 +31,8 @@ config :langka_order_management, LangkaOrderManagementWeb.Endpoint,
 # at the `config/runtime.exs`.
 config :langka_order_management, LangkaOrderManagement.Mailer, adapter: Swoosh.Adapters.Local
 
+config :tesla, adapter: {Tesla.Adapter.Finch, name: FinchHttpClient}
+
 # Configures Elixir's Logger
 config :logger, :console,
  format: "$time $metadata[$level] $message\n",
@@ -46,8 +48,13 @@ config :cors_plug,
 config :langka_order_management, :telegram_integration,
   channel_id: System.get_env("TELEGRAM_CHANNEL_ID")
 
-config :langka_order_management, :nadia,
-  token: System.get_env("TELEGRAM_BOT_TOKEN")
+config :nadia,
+  token: System.get_env("TELEGRAM_BOT_TOKEN"),
+  base_url: System.get_env("TELEGRAM_API_BASE_URL")
+
+config :langka_order_management, :supabase,
+  server_url: System.get_env("SUPABASE_SERVER_URL"),
+  api_key: System.get_env("SUPABASE_API_KEY")
 
 config :langka_order_management, LangkaOrderManagement.Auth,
   jwt_alg: "RS256",
