@@ -42,7 +42,7 @@ config :logger, :console,
 config :phoenix, :json_library, Jason
 
 config :cors_plug,
-  headers: ["x-api-key"],
+  headers: ["x-api-key", "authorization"],
   expose: ["x-paging-total-count"]
 
 config :langka_order_management, :telegram_integration,

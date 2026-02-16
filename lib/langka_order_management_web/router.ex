@@ -22,6 +22,13 @@ defmodule LangkaOrderManagementWeb.Router do
     post "/logout", AuthController, :logout
   end
 
+  scope "/api/admin" do
+    pipe_through [:api, :admin]
+
+    get "/list_transaction", FormRequest, LangkaOrderManagementWeb.ListTransaction
+    get "/list_user", FormRequest, LangkaOrderManagementWeb.ListUser
+  end
+
   scope "/api/auth", LangkaOrderManagementWeb do
     pipe_through :api
 

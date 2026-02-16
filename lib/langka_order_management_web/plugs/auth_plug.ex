@@ -7,6 +7,7 @@ defmodule LangkaOrderManagementWeb.AuthPlug do
 
   def call(conn, _opts) do
     with ["Bearer" <> token] <- get_req_header(conn, "authorization"),
+         token <- String.trim(token),
          {:ok, %{"sub" => user_id} = claims} <- Jwt.verify(token),
          %User{} = user <- Repo.get(User, user_id) do
           conn

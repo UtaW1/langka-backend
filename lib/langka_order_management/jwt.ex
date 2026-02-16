@@ -27,8 +27,8 @@ defmodule LangkaOrderManagement.Jwt do
   end
 
   defp jwt_alg, do: fetch!(:jwt_alg)
-  defp private_key, do: fetch!(:private_key)
-  defp public_key, do: fetch!(:public_key)
+  defp private_key, do: fetch!(:private_key) |> String.replace("\\n", "\n")
+  defp public_key, do: fetch!(:public_key) |> String.replace("\\n", "\n")
 
   defp fetch!(key) do
     Application.fetch_env!(:langka_order_management, LangkaOrderManagement.Auth)[key]

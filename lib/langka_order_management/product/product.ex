@@ -3,7 +3,6 @@ defmodule LangkaOrderManagement.Product.Product do
   import Ecto.Changeset
 
   alias LangkaOrderManagement.Product.{ProductCategory, ProductPrice}
-  alias LangkaOrderManagement.Account.Transaction
 
   schema "products" do
     field :latest_product_price, :map, virtual: true
@@ -16,7 +15,8 @@ defmodule LangkaOrderManagement.Product.Product do
 
     has_many :prices, ProductPrice
 
-    many_to_many :transactions, Transaction, join_through: "products_transactions"
+    has_many :product_transactions, LangkaOrderManagement.Product.ProductTransaction
+    has_many :transactions, through: [:product_transactions, :transaction]
 
     timestamps()
   end

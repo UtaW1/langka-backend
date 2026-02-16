@@ -4,7 +4,7 @@ defmodule LangkaOrderManagement.Account.Transaction do
 
   alias LangkaOrderManagement.Account.User
   alias LangkaOrderManagement.Promotion.Promotion
-  alias LangkaOrderManagement.Product.Product
+  alias LangkaOrderManagement.Product.{ProductTransaction}
 
   @primary_key {:id, :binary_id, autogenerate: true}
   schema "transactions" do
@@ -16,7 +16,8 @@ defmodule LangkaOrderManagement.Account.Transaction do
     belongs_to :user, User, type: :binary_id
     belongs_to :promotion_apply, Promotion
 
-    many_to_many :products, Product, join_through: "products_transactions"
+    has_many :product_transactions, ProductTransaction
+    has_many :products, through: [:product_transactions, :product]
 
     timestamps()
   end

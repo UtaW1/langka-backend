@@ -16,11 +16,41 @@ defmodule LangkaOrderManagement.Account do
   import Ecto.Query
 
   def list_all_transactions(filters) do
-    Transaction
-    |> where([t], t.status == ^"completed")
-    |> ContextUtil.list(filters)
-    |> preload([t], :products)
-    |> Repo.all()
+    query =
+      Transaction
+      |> where([t], t.status == ^"completed")
+      |> ContextUtil.list(filters)
+      |> preload([t], product_transactions: :product)
+
+    transactions = Repo.all(query)
+
+    count =
+      query
+      |> exclude(:select)
+      |> exclude(:order_by)
+      |> exclude(:preload)
+      |> select([t], count(t.id))
+      |> Repo.one()
+
+    {transactions, count}
+  end
+
+  def list_all_users(filters) do
+    query =
+      User
+      |> where([u], u.role == ^"user")
+      |> ContextUtil.list(filters)
+
+    users = Repo.all(query)
+
+    count =
+      query
+      |> exclude(:order_by)
+      |> exclude(:select)
+      |> select([u], count(u.id))
+      |> Repo.one()
+
+    {users, count}
   end
 
   def list_transactions_for_export(args) do

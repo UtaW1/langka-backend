@@ -1,0 +1,20 @@
+meta {
+  name: list_transaction
+  type: http
+  seq: 10
+}
+
+get {
+  url: http://localhost:4000/api/admin/list_transaction?page_size=2&page_number=0
+  body: none
+  auth: none
+}
+
+params:query {
+  page_size: 2
+  page_number: 0
+}
+
+headers {
+  authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzExNjUzNzMsInJvbGUiOiJhZG1pbiIsInN1YiI6IjAyYWMxZTg2LTYzYzgtNGEyMi1iMWMyLWNlODc0YmU5MjAzNyJ9.ofK8BxM8mUXkJmmuvqWbwgGuasz_DSbiHDQS5QMWdPtO6KrKp1jOUF3-EIQSOA6ewWte7coQkNze2f6mZ22u-AddsjmuPv7PulNM3O28UwXLbKCqHI7STwyghfJEGs90D_0eh91jahP7TiT87-gKxcV5ui8gbakPweKhTBt-F3kLUsnfhB1Zr-F5WUdGzh22eLmURRtB1AxUhG1Lxn8lN_tCSHZDaMmsySTflHumhYrLjiONZdXdU73bnv4Oz6uP357Ov4qnCIPjKmDh_AZp7HbS1A8z3EHQMATuoQ4dSHACOw6QOqsA9v7BrnHaiXqgYDdOXsLWtqTXstA92Kj31Q
+}

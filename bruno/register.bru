@@ -5,14 +5,14 @@ meta {
 }
 
 post {
-  url: http://localhost:4000/api/user/register
+  url: http://localhost:4000/api/auth/register
   body: multipartForm
   auth: none
 }
 
 body:multipart-form {
-  phone_number: 098221500
+  phone_number: 098221501
   password: bobbyboy123
-  role: user
+  role: admin
   username: jimmar
 }
