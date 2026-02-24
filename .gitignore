@@ -29,4 +29,5 @@ langka_order_management-*.tar
 /logs
 *.pem
 .env
+Caddyfile
 

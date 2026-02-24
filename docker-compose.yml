@@ -1,13 +1,28 @@
 services:
+  caddy:
+    image: caddy:latest
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - langka_net
+
   app:
-    image: langka_order_management
+    image: kuulz/langka-order-management:1.0.0
     container_name: app
     env_file: .env
     depends_on:
       postgres:
         condition: service_healthy
-    ports:
-      - "4000:4000"
+    expose:
+      - "4000"
+    networks:
+      - langka_net
 
   postgres:
     image: postgres:16-alpine
@@ -24,6 +39,14 @@ services:
       retries: 5
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - langka_net
 
 volumes:
   postgres_data:
+  caddy_data:  
+  caddy_config:
+
+networks:
+  langka_net:
+    driver: bridge
