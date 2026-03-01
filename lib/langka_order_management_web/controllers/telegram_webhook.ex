@@ -8,9 +8,9 @@ defmodule LangkaOrderManagementWeb.TelegramWebhook do
     }
   end
 
-  def perform(conn, %{"callback_query" => %{"data" => "order:complete:" <> id, "message" => message}}) do
+  def perform(conn, %{"callback_query" => %{"data" => "transaction:complete:" <> id, "message" => message}}) do
     with transaction when not is_nil(transaction) <- Account.get_transaction_by_id(id),
-         transaction when not is_tuple(transaction) <- Account.complete_order_on_webhook_callback(transaction)
+         {:ok, _} <- Account.complete_order_on_webhook_callback(transaction)
     do
       Nadia.edit_message_text(message["chat"]["id"], message["message_id"], "", "Order #{id} is completed!")
 
@@ -23,7 +23,7 @@ defmodule LangkaOrderManagementWeb.TelegramWebhook do
     end
   end
 
-  def perform(conn, %{"callback_query" => %{"data" => "order:cancel:" <> id, "message" => message}}) do
+  def perform(conn, %{"callback_query" => %{"data" => "transaction:cancel:" <> id, "message" => message}}) do
     with transaction when not is_nil(transaction) <- Account.get_transaction_by_id(id),
          transaction when not is_tuple(transaction) <- Account.cancel_order_on_webhook_callback(transaction)
     do
