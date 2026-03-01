@@ -2,6 +2,12 @@ defmodule LangkaOrderManagementWeb.TelegramWebhook do
   require Logger
   alias LangkaOrderManagement.Account
 
+  def rules(_) do
+    %{
+      "callback_query" => [required: false, nullable: true, type: :map]
+    }
+  end
+
   def perform(conn, %{"callback_query" => %{"data" => "order:complete:" <> id, "message" => message}}) do
     with transaction when not is_nil(transaction) <- Account.get_transaction_by_id(id),
          transaction when not is_tuple(transaction) <- Account.complete_order_on_webhook_callback(transaction)
@@ -32,4 +38,9 @@ defmodule LangkaOrderManagementWeb.TelegramWebhook do
     end
   end
 
+  def perform(conn, body) do
+    IO.inspect(body, label: "We are here")
+
+    Plug.Conn.send_resp(conn, 200, "")
+  end
 end
