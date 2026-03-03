@@ -28,6 +28,8 @@ defmodule LangkaOrderManagementWeb.Router do
     get "/list_transaction", FormRequest, LangkaOrderManagementWeb.ListTransaction
     get "/list_user", FormRequest, LangkaOrderManagementWeb.ListUser
 
+    get "/export_transaction", FormRequest, LangkaOrderManagementWeb.ExportTransaction
+
     scope "/products" do
       post "/", FormRequest, LangkaOrderManagementWeb.CreateProduct
 

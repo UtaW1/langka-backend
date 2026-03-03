@@ -15,6 +15,19 @@ defmodule LangkaOrderManagementWeb.ControllerUtils do
   def validate_boolean(%{value: false}), do: Validate.Validator.success(false)
   def validate_boolean(%{value: _}) , do: Validate.Validator.error("value must be true or false")
 
+  def validate_iso8601_datetime(%{value: nil}),
+    do: Validate.Validator.success(nil)
+
+  def validate_iso8601_datetime(%{value: "" <> datetime}) do
+    case DateTime.from_iso8601(datetime) do
+      {:ok, datetime, _} ->
+        Validate.Validator.success(datetime)
+
+      {:error, :invalid_format} ->
+        Validate.Validator.error("datetime has to be in iso8601 format, eg: 2024-06-09T16:06:09.128Z")
+    end
+  end
+
   def upload_to_storage_and_get_url(content, bucket_name, dir) do
     case Supabase.upload(bucket_name, content, dir) do
       {:ok, _} ->

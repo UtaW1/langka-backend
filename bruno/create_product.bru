@@ -5,16 +5,20 @@ meta {
 }
 
 post {
-  url: http://localhost:4000/admin/api/products
+  url: http://localhost:4000/api/admin/products
   body: json
   auth: none
 }
 
+headers {
+  authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzI1NDMzNDAsInJvbGUiOiJhZG1pbiIsInN1YiI6IjAyYWMxZTg2LTYzYzgtNGEyMi1iMWMyLWNlODc0YmU5MjAzNyJ9.D77AZeaANgsYJinkKmBheqhCQql5CQw6qfcwJRVI6ZLr5rdNmnU0NRVJUqGmF2FgK1K5kJIZ2Kr6Nz7UhE4EX9hvIRHSPSM6_BmQLR6CqmL1O-h0RTQl3EgU1dgsVB3iRkaql2y0yP3Io3Pag5r9KrUwEfrnq9IdPLTEyXmpVhxVV4zud_Gc6JLxhcQNk8QUbJXTGuUyDNnCJ_RVMFlZ3g4P06BbLrlIWBC-Kwg09VCcYaT3rGQFPkBf-KbNmzP8AzJpWT-q4ih5w-7YvzehncgykHVhGZxelDfhinTFD7874KGZhgOGMEyGBrf44E_OI3_282g6Tugan84Y5S-fzQ
+}
+
 body:json {
   {
-    "name": "spaghetti",
+    "name": "cake",
     "code": null, 
     "product_category_id": 1, 
-    "price_as_usd": 4.0
+    "price_as_usd": 5.0
   }
 }
