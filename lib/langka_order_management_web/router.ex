@@ -34,7 +34,10 @@ defmodule LangkaOrderManagementWeb.Router do
       post "/", FormRequest, LangkaOrderManagementWeb.CreateProduct
 
       post "/category", FormRequest, LangkaOrderManagementWeb.CreateCategory
-      get "/category", FormRequest, LangkaOrderManagementWeb.ListProductCategory
+    end
+
+    scope "/promotion" do
+      post "/", FormRequest, LangkaOrderManagementWeb.CreatePromotion
     end
   end
 
@@ -56,6 +59,10 @@ defmodule LangkaOrderManagementWeb.Router do
 
     scope "/products" do
       get "/", FormRequest, LangkaOrderManagementWeb.ListProduct
+    end
+
+    scope "/categories" do
+      get "/", FormRequest, LangkaOrderManagementWeb.ListProductCategory
     end
 
     post "/order", FormRequest, LangkaOrderManagementWeb.MakePendingOrder

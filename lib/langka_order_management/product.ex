@@ -112,7 +112,6 @@ defmodule LangkaOrderManagement.Product do
       |> select([p], count(fragment("DISTINCT ?", p.id)))
       |> Repo.one()
     }
-    |> IO.inspect()
   end
 
   def list_product_categories_with_paging(filters) do
