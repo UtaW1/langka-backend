@@ -20,6 +20,7 @@ defmodule LangkaOrderManagement.Account.User do
   def registration_changeset(user, attrs) do
     user
     |> cast(attrs, [:username, :phone_number, :password, :role])
+    |> validate_exclusion(:role, ["admin"])
     |> validate_required([:username, :password])
     |> validate_length(:password, min: 8)
     |> put_hashed_password()

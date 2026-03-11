@@ -40,9 +40,23 @@ defmodule LangkaOrderManagementWeb.Endpoint do
     pass: ["*/*"],
     json_decoder: Phoenix.json_library()
 
+  plug CORSPlug,
+    origin: [
+      "http://localhost:5173"
+    ],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    headers: [
+      "Authorization",
+      "Content-Type",
+      "X-Requested-With",
+      "X-CSRF-Token"
+    ],
+    expose: ["x-paging-total-count"],
+    max_age: 86_400
+
   plug Plug.MethodOverride
   plug Plug.Head
   plug Plug.Session, @session_options
-  plug CORSPlug
   plug LangkaOrderManagementWeb.Router
 end

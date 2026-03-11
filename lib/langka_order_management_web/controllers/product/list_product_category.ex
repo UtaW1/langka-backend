@@ -44,6 +44,7 @@ defmodule LangkaOrderManagementWeb.ListProductCategory do
         id: &1.id,
         name: &1.name,
         description: &1.description,
+        inserted_at: &1.inserted_at,
         products: Enum.map(&1.products, fn product ->
           %{
             id: product.id,
