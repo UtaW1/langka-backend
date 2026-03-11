@@ -23,7 +23,8 @@ defmodule LangkaOrderManagementWeb.ListUser do
       Enum.map(users, & %{
         id: &1.id,
         username: &1.username,
-        phone_number: &1.phone_number
+        phone_number: &1.phone_number,
+        inserted_at: &1.inserted_at
       })
     end
   end

@@ -10,7 +10,7 @@ defmodule LangkaOrderManagement.Account.User do
     field :username, :string
     field :phone_number, :string
     field :hashed_password, :string
-    field :role, :string, default: "user"
+    field :role, :string, default: "customer"
 
     field :password, :string, virtual: true
 

@@ -38,7 +38,7 @@ defmodule LangkaOrderManagement.Account do
   def list_all_users(filters) do
     query =
       User
-      |> where([u], u.role == ^"user")
+      |> where([u], u.role == ^"customer")
       |> ContextUtil.list(filters)
 
     users = Repo.all(query)
