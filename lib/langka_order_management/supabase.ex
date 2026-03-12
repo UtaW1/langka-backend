@@ -123,6 +123,10 @@ defmodule LangkaOrderManagement.Supabase do
   end
 
   def get_public_asset(%{image_transform: image_transform} = req) do
+    req = %{
+      req | file_path: URI.encode(req.file_path)
+    }
+
     base_url = get_base_url(http_client())
     url = "#{base_url}/object/public/#{req.bucket_name}/#{req.file_path}"
 
