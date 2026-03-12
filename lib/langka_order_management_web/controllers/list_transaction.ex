@@ -27,6 +27,7 @@ defmodule LangkaOrderManagementWeb.ListTransaction do
         table_number: &1.table_number,
         user_id: &1.user_id,
         promotion_id: &1.promotion_apply_id,
+        inserted_at: &1.inserted_at,
         products_orders: Enum.map(&1.product_transactions, fn pt ->
           %{
             product_id: pt.product_id,

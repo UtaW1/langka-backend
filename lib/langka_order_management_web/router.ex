@@ -57,7 +57,7 @@ defmodule LangkaOrderManagementWeb.Router do
     post "/login", AuthController, :login
   end
 
-  scope "/telegram_integration" do
+  scope "/api/telegram_integration" do
     pipe_through :api
 
     post "/webhook_handler", FormRequest, LangkaOrderManagementWeb.TelegramWebhook
