@@ -23,7 +23,7 @@ defmodule LangkaOrderManagementWeb.Router do
   end
 
   scope "/api/admin" do
-    pipe_through [:api]
+    pipe_through [:api, :admin]
 
     get "/list_transaction", FormRequest, LangkaOrderManagementWeb.ListTransaction
     get "/list_user", FormRequest, LangkaOrderManagementWeb.ListUser
@@ -41,7 +41,11 @@ defmodule LangkaOrderManagementWeb.Router do
       post "/", FormRequest, LangkaOrderManagementWeb.CreateCategory
     end
 
-    scope "/promotion" do
+    scope "/promotions" do
+      get "/", FormRequest, LangkaOrderManagementWeb.ListPromotion
+      patch "/:id", FormRequest, LangkaOrderManagementWeb.UpdatePromotion
+      get "/:id", FormRequest, LangkaOrderManagementWeb.GetPromotion
+      delete "/:id", FormRequest, LangkaOrderManagementWeb.DeletePromotion
       post "/", FormRequest, LangkaOrderManagementWeb.CreatePromotion
     end
   end
@@ -71,6 +75,8 @@ defmodule LangkaOrderManagementWeb.Router do
     end
 
     post "/order", FormRequest, LangkaOrderManagementWeb.MakePendingOrder
+
+    get "/promotion", FormRequest, LangkaOrderManagementWeb.GetActivePromotion
   end
 
   # Enable Swoosh mailbox preview in development

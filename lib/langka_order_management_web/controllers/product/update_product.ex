@@ -23,6 +23,13 @@ defmodule LangkaOrderManagementWeb.UpdateProduct do
       else
         nil ->
           ControllerUtils.render_error(conn, 422, "422.json", :product_not_found, "")
+
+        {:error, cs} ->
+          conn
+          |> Plug.Conn.put_status(422)
+          |> Phoenix.Controller.put_view(LangkaOrderManagementWeb.ErrorJSON)
+          |> Phoenix.Controller.render("422.json", %{error: cs})
+
         err ->
           ControllerUtils.render_error(conn, 500, "500.json", :unexpected_error, "#{inspect(err)}")
     end
@@ -41,8 +48,14 @@ defmodule LangkaOrderManagementWeb.UpdateProduct do
       nil ->
         ControllerUtils.render_error(conn, 422, "422.json", :product_not_found, "")
 
+      {:error, cs} ->
+        conn
+        |> Plug.Conn.put_status(422)
+        |> Phoenix.Controller.put_view(LangkaOrderManagementWeb.ErrorJSON)
+        |> Phoenix.Controller.render("422.json", %{error: cs})
+
       err ->
-        err
+        ControllerUtils.render_error(conn, 500, "500.json", :unexpected_error, "#{inspect(err)}")
     end
   end
 

@@ -1,10 +1,17 @@
 defmodule LangkaOrderManagementWeb.ControllerUtils do
   alias LangkaOrderManagement.Supabase
 
+  def render_error(conn, status, render, "" <> err_msg) do
+    conn
+    |> Plug.Conn.put_status(status)
+    |> Phoenix.Controller.put_view(LangkaOrderManagementWeb.ErrorJSON)
+    |> Phoenix.Controller.render(render, %{error: err_msg})
+  end
+
   def render_error(conn, status, render, error, message) do
     conn
     |> Plug.Conn.put_status(status)
-    |> Phoenix.Controller.put_view(EpicureCanteenWeb.ErrorJSON)
+    |> Phoenix.Controller.put_view(LangkaOrderManagementWeb.ErrorJSON)
     |> Phoenix.Controller.render(render, %{error: {error, message}})
   end
 

@@ -1,6 +1,6 @@
 defmodule LangkaOrderManagement.Promotion do
   import Ecto.Query, warn: false
-  alias LangkaOrderManagement.Repo
+  alias LangkaOrderManagement.{Repo, ContextUtil}
 
   alias LangkaOrderManagement.{
     Promotion.Promotion,
@@ -12,6 +12,14 @@ defmodule LangkaOrderManagement.Promotion do
     %Promotion{}
     |> Promotion.changeset(attrs)
     |> Repo.insert()
+  end
+
+  def get_promotion(id), do: Repo.get(Promotion, id)
+
+  def update_promotion(%Promotion{} = promotion, args) do
+    promotion
+    |> Promotion.changeset(args)
+    |> Repo.update()
   end
 
   def get_a_user_latest_continous_promotion_for_transaction(user_id) do
@@ -49,20 +57,33 @@ defmodule LangkaOrderManagement.Promotion do
     |> Repo.exists?()
   end
 
-  def retire_promotion(promotion_id) do
-    promotion =
-      Promotion
-      |> where([p], p.id == ^promotion_id)
-      |> where([p], p.status == ^"active")
-      |> Repo.one()
+  def retire_promotion(%Promotion{status: "active"} = promotion) do
+    promotion
+    |> Promotion.retire_changeset(%{status: "retired", removed_datetime: DateTime.truncate(DateTime.utc_now(), :second)})
+    |> Repo.update()
+  end
 
-    if promotion do
-      promotion
-      |> Promotion.retire_changeset(%{status: "retired", removed_datetime: DateTime.truncate(DateTime.utc_now(), :second)})
-      |> Repo.update()
-    else
-      {:error, :promotion_in_unactive_state}
-    end
+  def retire_promotion(_), do: {:error, :promotion_in_unactive_state}
+
+  def list_promotions_with_paging(filters) do
+    promotion_query =
+      Promotion
+      |> from(as: :promotion)
+      |> ContextUtil.list(filters)
+
+    {
+      promotion_query
+      |> exclude(:order_by)
+      |> order_by([p], desc: :id)
+      |> Repo.all(),
+
+      promotion_query
+      |> exclude(:limit)
+      |> exclude(:offset)
+      |> exclude(:order_by)
+      |> select([p], count())
+      |> Repo.one()
+    }
   end
 
   def get_latest_active_promotion_for_transaction() do

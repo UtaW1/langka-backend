@@ -20,7 +20,7 @@ defmodule LangkaOrderManagementWeb.DeleteProduct do
       {:error, cs} ->
         conn
         |> Plug.Conn.put_status(422)
-        |> Phoenix.Controller.put_view(EpicureCanteenWeb.ErrorJSON)
+        |> Phoenix.Controller.put_view(LangkaOrderManagementWeb.ErrorJSON)
         |> Phoenix.Controller.render("422.json", %{error: cs})
     end
   end
