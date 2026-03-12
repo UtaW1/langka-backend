@@ -60,7 +60,9 @@ defmodule LangkaOrderManagement.Supabase do
   end
 
   defp try_upload_as_new_file({:ok, client}, {bucket_name, file_data, file_path}) do
-    case Tesla.post(client, "/object/#{bucket_name}/#{file_path}", file_data) do
+    encoded_path = URI.encode(file_path)
+
+    case Tesla.post(client, "/object/#{bucket_name}/#{encoded_path}", file_data) do
       {:ok, %Tesla.Env{status: 200}} ->
         {:ok, "supabase-s3:#{bucket_name}:#{file_path}"}
 
