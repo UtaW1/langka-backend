@@ -8,7 +8,7 @@ defmodule LangkaOrderManagement.Promotion.Promotion do
     field :status, :string
     field :removed_datetime, :utc_datetime
 
-    timestamps(updated_at: false)
+    timestamps()
   end
 
   def changeset(promotion, attrs) do

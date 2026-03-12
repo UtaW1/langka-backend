@@ -1,0 +1,18 @@
+meta {
+  name: get_public_product_image
+  type: http
+  seq: 19
+}
+
+post {
+  url: http://localhost:4000/api/public_bucket_asset
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "image_url": "product/product-1-som:roQLuldCNIh8pBwOatqR28ijgab8mLsl:20260312061617.jpeg", 
+    "image_transform": {}
+  }
+}

@@ -25,6 +25,7 @@ defmodule LangkaOrderManagementWeb.CreatePromotion do
         id: promotion.id,
         transaction_count_to_get_discount: promotion.transaction_count_to_get_discount,
         discount_as_percent: promotion.discount_as_percent,
+        status: promotion.status,
         inserted_at: promotion.inserted_at
       }
     end

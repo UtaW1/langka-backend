@@ -77,6 +77,8 @@ defmodule LangkaOrderManagementWeb.Router do
     post "/order", FormRequest, LangkaOrderManagementWeb.MakePendingOrder
 
     get "/promotion", FormRequest, LangkaOrderManagementWeb.GetActivePromotion
+
+    post "/public_bucket_asset", FormRequest, LangkaOrderManagementWeb.GetPublicAsset
   end
 
   # Enable Swoosh mailbox preview in development

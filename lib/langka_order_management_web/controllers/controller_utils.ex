@@ -8,6 +8,13 @@ defmodule LangkaOrderManagementWeb.ControllerUtils do
     |> Phoenix.Controller.render(render, %{error: err_msg})
   end
 
+  def render_error(conn, status, render, %{} = err) do
+    conn
+    |> Plug.Conn.put_status(status)
+    |> Phoenix.Controller.put_view(LangkaOrderManagementWeb.ErrorJSON)
+    |> Phoenix.Controller.render(render, %{error: err})
+  end
+
   def render_error(conn, status, render, error, message) do
     conn
     |> Plug.Conn.put_status(status)
