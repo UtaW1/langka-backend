@@ -65,6 +65,13 @@ defmodule LangkaOrderManagementWeb.ErrorJSON do
     }
   end
 
+  def render("500.json", %{error: {error_key, "" <> err_msg}}) when is_atom(error_key) do
+    %{
+      message: error_key,
+      detail: err_msg
+    }
+  end
+
   def render("500.json", %{error: error}) do
     %{
       message: "",
@@ -76,6 +83,13 @@ defmodule LangkaOrderManagementWeb.ErrorJSON do
     %{
       message: "Unexpected Error Occured",
       detail: "#{inspect(error)}"
+    }
+  end
+
+  def render("404.json", %{error: {err, msg}}) do
+    %{
+      message: err,
+      detail: msg
     }
   end
 

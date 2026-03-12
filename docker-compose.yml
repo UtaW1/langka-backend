@@ -9,6 +9,18 @@ services:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
       - caddy_config:/config
+    depends_on:
+      - frontend
+      - app
+    networks:
+      - langka_net
+
+  frontend:
+    image: kuulz/langka-frontend:1.0.0
+    container_name: frontend
+    restart: unless-stopped
+    expose:
+      - "80"
     networks:
       - langka_net
 

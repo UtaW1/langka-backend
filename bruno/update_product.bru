@@ -1,0 +1,21 @@
+meta {
+  name: update_product
+  type: http
+  seq: 13
+}
+
+patch {
+  url: http://localhost:4000/api/admin/products/{{id}}
+  body: multipartForm
+  auth: none
+}
+
+body:multipart-form {
+  name: som
+  price_as_usd: 10.0
+  product_image: @file(/home/kul/Downloads/hok-face.jpg)
+}
+
+vars:pre-request {
+  id: 1
+}

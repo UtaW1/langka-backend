@@ -23,7 +23,7 @@ defmodule LangkaOrderManagementWeb.Router do
   end
 
   scope "/api/admin" do
-    pipe_through [:api, :admin]
+    pipe_through [:api]
 
     get "/list_transaction", FormRequest, LangkaOrderManagementWeb.ListTransaction
     get "/list_user", FormRequest, LangkaOrderManagementWeb.ListUser
@@ -32,8 +32,13 @@ defmodule LangkaOrderManagementWeb.Router do
 
     scope "/products" do
       post "/", FormRequest, LangkaOrderManagementWeb.CreateProduct
+      get "/:id", FormRequest, LangkaOrderManagementWeb.GetProduct
+      patch "/:id", FormRequest, LangkaOrderManagementWeb.UpdateProduct
+      delete "/:id", FormRequest, LangkaOrderManagementWeb.DeleteProduct
+    end
 
-      post "/category", FormRequest, LangkaOrderManagementWeb.CreateCategory
+    scope "/categories" do
+      post "/", FormRequest, LangkaOrderManagementWeb.CreateCategory
     end
 
     scope "/promotion" do

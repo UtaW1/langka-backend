@@ -1,13 +1,15 @@
 defmodule LangkaOrderManagement.Product do
   import Ecto.Query, warn: false
 
-  alias LangkaOrderManagement.{Repo, ContextUtil}
+  alias LangkaOrderManagement.{Repo, ContextUtil, Supabase}
 
   alias LangkaOrderManagement.Product.{
     Product,
     ProductCategory,
     ProductPrice
   }
+
+  @bucketname "product-images"
 
   # ─────────────────────────────
   # Product Categories
@@ -45,15 +47,27 @@ defmodule LangkaOrderManagement.Product do
 
   def list_products do
     Product
-    |> preload([:product_category, :product_prices])
+    |> preload([:product_category, :prices])
     |> Repo.all()
   end
 
-  def get_product!(id) do
+  def get_product(id) do
     Product
-    |> preload([:product_category, :product_prices])
-    |> Repo.get!(id)
+    |> preload([:product_category, :prices])
+    |> Repo.get(id)
   end
+
+  def delete_product_image(%Product{image_url: "" <> url}) do
+    case Supabase.remove(@bucketname, url) do
+      {:ok, nil} ->
+        {:ok, nil}
+
+      err ->
+        err
+    end
+  end
+
+  def delete_product_image(_), do: {:ok, nil}
 
   def create_product(attrs \\ %{}) do
     %Product{}
@@ -61,14 +75,44 @@ defmodule LangkaOrderManagement.Product do
     |> Repo.insert()
   end
 
+  def update_product(%Product{} = product, %{"price_as_usd" => price} = attrs) when is_float(price) do
+    {:ok, product_price} = create_product_price(%{product_id: product.id, price_as_usd: price})
+
+    {:ok, updated_product} =
+      product
+      |> Product.changeset(attrs)
+      |> Repo.update()
+
+    {:ok, %{updated_product | latest_product_price: product_price}}
+  end
+
   def update_product(%Product{} = product, attrs) do
-    product
-    |> Product.changeset(attrs)
-    |> Repo.update()
+    {:ok, updated_product} =
+      product
+      |> Product.changeset(attrs)
+      |> Repo.update()
+
+    %{product: product, latest_product_price: latest_price} = get_product_with_latest_price(updated_product.id)
+
+    {:ok, %{product | latest_product_price: latest_price}}
   end
 
   def delete_product(%Product{} = product) do
-    Repo.delete(product)
+    product
+    |> Product.changeset(%{removed_datetime: DateTime.truncate(DateTime.utc_now(), :second)})
+    |> Repo.update()
+  end
+
+  def get_enriched_product_by_id(id) do
+    product = get_product(id)
+
+    if product do
+      %{product: product, latest_product_price: latest_price} = get_product_with_latest_price(product.id)
+
+      %{product | latest_product_price: latest_price}
+    else
+      nil
+    end
   end
 
   def change_product(%Product{} = product, attrs \\ %{}) do
@@ -224,7 +268,7 @@ defmodule LangkaOrderManagement.Product do
       preload: [:product_category],
       select: %{
         product: p,
-        latest_price: lp
+        latest_product_price: lp
       }
     )
     |> Repo.one()
@@ -259,5 +303,34 @@ defmodule LangkaOrderManagement.Product do
 
   def change_product_price(%ProductPrice{} = product_price, attrs \\ %{}) do
     ProductPrice.changeset(product_price, attrs)
+  end
+
+  def upload_product_image(%Plug.Upload{path: tmp_path, content_type: content_type}, %Product{name: name, id: id} = product) do
+    timestamp =
+      DateTime.utc_now()
+      |> DateTime.to_iso8601()
+      |> String.slice(0..18)
+      |> String.replace(~r/[^0-9]/, "")
+
+    filename = "product-#{id}-#{name}:#{Nanoid.generate(32)}:#{timestamp}"
+
+    content_type =
+      content_type
+      |> String.split("/")
+      |> List.last()
+
+    file_path = "product/#{filename}.#{content_type}"
+
+    tmp_path = File.read!(tmp_path)
+
+    case Supabase.upload(@bucketname, tmp_path, file_path) do
+      {:ok, _} ->
+        product
+        |> Product.changeset(%{image_url: file_path})
+        |> Repo.update()
+
+      {:error, reason} ->
+        {:error, %{upload_error: reason}}
+    end
   end
 end

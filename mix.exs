@@ -51,7 +51,8 @@ defmodule LangkaOrderManagement.MixProject do
       {:nadia, "~> 0.7.0"},
       {:elixlsx, "~> 0.6.0"},
       {:xlsx_reader, "~> 0.8.0"},
-      {:tesla, "~> 1.9"}
+      {:tesla, "~> 1.9"},
+      {:nanoid, "~> 2.1.0"},
     ]
   end
 

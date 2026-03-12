@@ -10,6 +10,7 @@ defmodule LangkaOrderManagement.Product.Product do
     field :name, :string
     field :removed_datetime, :utc_datetime
     field :code, :string
+    field :image_url, :string
 
     belongs_to :product_category, ProductCategory
 
@@ -23,7 +24,7 @@ defmodule LangkaOrderManagement.Product.Product do
 
   def changeset(product, attrs) do
     product
-    |> cast(attrs, [:name, :code, :product_category_id, :removed_datetime])
+    |> cast(attrs, [:name, :code, :product_category_id, :removed_datetime, :image_url])
     |> validate_required([:name, :product_category_id])
     |> foreign_key_constraint(:product_category_id)
   end
