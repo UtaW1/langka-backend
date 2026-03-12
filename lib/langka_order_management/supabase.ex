@@ -168,9 +168,9 @@ defmodule LangkaOrderManagement.Supabase do
     %{
       "resize" => "cover",
       "format" => "avif",
-      "width" => image_transform.width,
-      "height" => image_transform.height,
-      "quality" => image_transform.quality
+      "width" => image_transform["width"],
+      "height" => image_transform["height"],
+      "quality" => image_transform["quality"]
     }
   end
 
