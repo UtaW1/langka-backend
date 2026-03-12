@@ -38,7 +38,8 @@ defmodule LangkaOrderManagementWeb.ListPromotion do
         id: &1.id,
         transaction_count_to_get_discount: &1.transaction_count_to_get_discount,
         discount_as_percent: &1.discount_as_percent,
-        status: &1.status
+        status: &1.status,
+        inserted_at: &1.inserted_at
       })
     end
   end
