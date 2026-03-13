@@ -26,6 +26,7 @@ defmodule LangkaOrderManagementWeb.Router do
     pipe_through [:api]
 
     get "/list_transaction", FormRequest, LangkaOrderManagementWeb.ListTransaction
+    get "/transaction/:id", FormRequest, LangkaOrderManagementWeb.GetTransaction
     patch "/transactions/:id/invoice_id", FormRequest, LangkaOrderManagementWeb.UpdateCompletedTransactionInvoice
     get "/list_table_transaction", FormRequest, LangkaOrderManagementWeb.ListTableTransaction
     get "/list_user", FormRequest, LangkaOrderManagementWeb.ListUser

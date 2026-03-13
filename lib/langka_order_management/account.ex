@@ -76,6 +76,7 @@ defmodule LangkaOrderManagement.Account do
   def get_transaction_by_id(id) do
     Transaction
     |> where([t], t.id == ^id)
+    |> preload([t], [product_transactions: :product, seating_table: []])
     |> Repo.one()
   end
 
