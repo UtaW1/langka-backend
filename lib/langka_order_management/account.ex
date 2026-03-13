@@ -95,6 +95,24 @@ defmodule LangkaOrderManagement.Account do
 
   def cancel_order_on_webhook_callback(_), do: {:error, :transaction_in_non_processable_state}
 
+  def update_completed_transaction_invoice_id(transaction_id, invoice_id) do
+    transaction =
+      Transaction
+      |> where([t], t.id == ^transaction_id)
+      |> where([t], t.status == ^"completed")
+      |> Repo.one()
+
+    case transaction do
+      %Transaction{} = transaction ->
+        transaction
+        |> Transaction.update_invoice_id_changeset(%{invoice_id: invoice_id})
+        |> Repo.update()
+
+      nil ->
+        {:error, :transaction_not_found_or_not_completed}
+    end
+  end
+
   def make_pending_order(%{"user_id" => nil} = args) do
     products_orders = args["products_orders"]
 

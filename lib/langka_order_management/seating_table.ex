@@ -18,6 +18,41 @@ defmodule LangkaOrderManagement.SeatingTable do
     |> Repo.exists?()
   end
 
+  def list_seating_tables_with_paging(filters) do
+    query =
+      SeatingTable
+      |> ContextUtil.list(filters)
+
+    tables = Repo.all(query)
+
+    count =
+      query
+      |> exclude(:order_by)
+      |> exclude(:select)
+      |> select([table], count(table.id))
+      |> Repo.one()
+
+    {tables, count}
+  end
+
+  def get_seating_table(id), do: Repo.get(SeatingTable, id)
+
+  def create_seating_table(attrs) do
+    %SeatingTable{}
+    |> SeatingTable.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def update_seating_table(%SeatingTable{} = table, attrs) do
+    table
+    |> SeatingTable.changeset(attrs)
+    |> Repo.update()
+  end
+
+  def delete_seating_table(%SeatingTable{} = table) do
+    Repo.delete(table)
+  end
+
   def list_table_transactions(filters) do
     query =
       SeatingTable

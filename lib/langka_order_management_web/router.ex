@@ -26,6 +26,7 @@ defmodule LangkaOrderManagementWeb.Router do
     pipe_through [:api]
 
     get "/list_transaction", FormRequest, LangkaOrderManagementWeb.ListTransaction
+    patch "/transactions/:id/invoice_id", FormRequest, LangkaOrderManagementWeb.UpdateCompletedTransactionInvoice
     get "/list_table_transaction", FormRequest, LangkaOrderManagementWeb.ListTableTransaction
     get "/list_user", FormRequest, LangkaOrderManagementWeb.ListUser
     get "/metrics/product_monthly", FormRequest, LangkaOrderManagementWeb.ListProductMonthlyMetric
@@ -42,6 +43,14 @@ defmodule LangkaOrderManagementWeb.Router do
 
     scope "/categories" do
       post "/", FormRequest, LangkaOrderManagementWeb.CreateCategory
+    end
+
+    scope "/seating_tables" do
+      post "/", FormRequest, LangkaOrderManagementWeb.CreateSeatingTable
+      get "/", FormRequest, LangkaOrderManagementWeb.ListSeatingTable
+      get "/:id", FormRequest, LangkaOrderManagementWeb.GetSeatingTable
+      patch "/:id", FormRequest, LangkaOrderManagementWeb.UpdateSeatingTable
+      delete "/:id", FormRequest, LangkaOrderManagementWeb.DeleteSeatingTable
     end
 
     scope "/promotions" do

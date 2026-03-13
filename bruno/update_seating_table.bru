@@ -1,0 +1,22 @@
+meta {
+  name: update_seating_table
+  type: http
+  seq: 34
+}
+
+patch {
+  url: http://localhost:4000/api/admin/seating_tables/{{id}}
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "table_number": "T01",
+    "seating_count": 6
+  }
+}
+
+vars:pre-request {
+  id: 1
+}

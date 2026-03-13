@@ -1,0 +1,18 @@
+meta {
+  name: create_seating_table
+  type: http
+  seq: 31
+}
+
+post {
+  url: http://localhost:4000/api/admin/seating_tables
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "table_number": "T01",
+    "seating_count": 4
+  }
+}

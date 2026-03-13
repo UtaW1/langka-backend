@@ -42,4 +42,10 @@ defmodule LangkaOrderManagement.Account.Transaction do
     |> cast(attrs, [:status])
     |> validate_inclusion(:status, ["cancelled"])
   end
+
+  def update_invoice_id_changeset(transaction, attrs) do
+    transaction
+    |> cast(attrs, [:invoice_id])
+    |> validate_required([:invoice_id])
+  end
 end
