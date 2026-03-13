@@ -7,6 +7,8 @@ defmodule LangkaOrderManagement.SeatingTable.SeatingTable do
     field :seating_count, :integer
 
     has_many :transactions, LangkaOrderManagement.Account.Transaction
+
+    timestamps()
   end
 
   def changeset(table, attrs) do

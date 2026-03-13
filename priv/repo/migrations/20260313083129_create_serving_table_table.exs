@@ -5,6 +5,8 @@ defmodule LangkaOrderManagement.Repo.Migrations.CreateServingTableTable do
     create table(:seating_tables) do
       add :table_number, :string
       add :seating_count, :integer
+
+      timestamps()
     end
 
     alter table(:transactions) do
