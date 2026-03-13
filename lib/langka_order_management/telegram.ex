@@ -10,12 +10,32 @@ defmodule LangkaOrderManagement.Telegram do
   end
 
   def send_order_payload_to_channel(user_id, transaction, products_orders) do
-    items_list = Enum.map_join(products_orders, "\n", & "- #{&1["product_detail"].name} (x#{&1["quantity"]})")
+    items_list =
+      Enum.map_join(products_orders, "\n", fn product_order ->
+        product_name = product_order["product_detail"].name
+        quantity = product_order["quantity"]
+
+        customizations =
+          [
+            if(product_order["sugar_level"], do: "sugar: #{product_order["sugar_level"]}%", else: nil),
+            if(product_order["ice_level"], do: "ice: #{product_order["ice_level"]}", else: nil),
+            if(product_order["order_note"], do: "note: #{product_order["order_note"]}", else: nil)
+          ]
+          |> Enum.reject(&is_nil/1)
+
+        item_line = "- #{product_name} (x#{quantity})"
+
+        if customizations == [] do
+          item_line
+        else
+          item_line <> "\n  customizations: " <> Enum.join(customizations, " | ")
+        end
+      end)
 
     message = """
       *NEW ORDER RECEIVED!*
       Customer: #{if user_id, do: user_id, else: "Guest"}
-      Table: #{transaction.table_number}
+      Table: #{transaction.seating_table_id}
       Items:
       #{items_list}
       Total: $#{transaction.bill_price_as_usd}

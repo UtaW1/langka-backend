@@ -1,5 +1,8 @@
 defmodule LangkaOrderManagementWeb.MakePendingOrder do
-  alias LangkaOrderManagement.{Account, Telegram}
+  alias LangkaOrderManagement.{Account, Telegram, SeatingTable}
+
+  @allowed_sugar_levels [0, 25, 50, 75, 100, 125]
+  @allowed_ice_levels ["no ice", "less ice", "normal ice"]
 
   def rules(_) do
     %{
@@ -10,17 +13,21 @@ defmodule LangkaOrderManagementWeb.MakePendingOrder do
           type: :map,
           map: %{
             "product_id" => [required: true, type: :integer, cast: :integer, min: 1],
-            "quantity" => [required: true, cast: :integer, type: :integer, min: 1]
+            "quantity" => [required: true, cast: :integer, type: :integer, min: 1],
+            "sugar_level" => [required: false, nullable: true, cast: :integer, custom: &__MODULE__.validate_sugar_level/1],
+            "ice_level" => [required: false, nullable: true, type: :string, custom: &__MODULE__.validate_ice_level/1],
+            "order_note" => [required: false, nullable: true, type: :string]
           }
         ]
       ],
       "invoice_id" => [required: false, nullable: true, type: :string],
-      "table_number" => [required: true, nullable: false, cast: :string, type: :string]
+      "seating_table_id" => [required: true, nullable: false, cast: :integer, type: :integer, min: 1]
     }
   end
 
   def perform(conn, args) do
-    with {:ok, %{pending_transaction: transaction, products_orders: products_orders} = multi_res} when is_map(multi_res) <- Account.make_pending_order(args),
+    with false <- SeatingTable.pending_order_table_limit(args["seating_table_id"]),
+         {:ok, %{pending_transaction: transaction, products_orders: products_orders} = multi_res} when is_map(multi_res) <- Account.make_pending_order(args),
          {:ok, _message} <- Telegram.send_order_payload_to_channel(args["user_id"], transaction, products_orders)
         do
           conn
@@ -28,6 +35,12 @@ defmodule LangkaOrderManagementWeb.MakePendingOrder do
           |> Phoenix.Controller.render("make_pending_order.json", data: {transaction, products_orders})
 
         else
+          true ->
+            conn
+            |> Plug.Conn.put_status(:bad_request)
+            |> Phoenix.Controller.put_view(LangkaOrderManagementWeb.ErrorJSON)
+            |> Phoenix.Controller.render("400.json", %{error: :pending_order_limit_reached, message: "The table has reached the pending order limit of 3. Please wait until one of the pending orders is completed."})
+
           {:error, step, reason, _changes} ->
             conn
             |> Plug.Conn.put_status(:internal_server_error)
@@ -38,7 +51,7 @@ defmodule LangkaOrderManagementWeb.MakePendingOrder do
             conn
             |> Plug.Conn.put_status(:internal_server_error)
             |> Phoenix.Controller.put_view(LangkaOrderManagementWeb.ErrorJSON)
-            |> Phoenix.Controller.render("500.json", %{error: :unepxcted_error_occured, message: "#{inspect(error)}"})
+            |> Phoenix.Controller.render("500.json", %{error: :unexpected_error_occurred, message: "#{inspect(error)}"})
         end
   end
 
@@ -54,9 +67,28 @@ defmodule LangkaOrderManagementWeb.MakePendingOrder do
         products_orders: Enum.map(po, & %{
           id: &1["product_detail"].id,
           quantity: &1["quantity"],
-          name: &1["product_detail"].name
+          name: &1["product_detail"].name,
+          sugar_level: &1["sugar_level"],
+          ice_level: &1["ice_level"],
+          order_note: &1["order_note"]
         })
       }
     end
   end
+
+  def validate_sugar_level(%{value: nil}), do: Validate.Validator.success(nil)
+
+  def validate_sugar_level(%{value: sugar_level}) when sugar_level in @allowed_sugar_levels,
+    do: Validate.Validator.success(sugar_level)
+
+  def validate_sugar_level(%{value: _}),
+    do: Validate.Validator.error("sugar_level must be one of: 0, 25, 50, 75, 100, 125")
+
+  def validate_ice_level(%{value: nil}), do: Validate.Validator.success(nil)
+
+  def validate_ice_level(%{value: ice_level}) when ice_level in @allowed_ice_levels,
+    do: Validate.Validator.success(ice_level)
+
+  def validate_ice_level(%{value: _}),
+    do: Validate.Validator.error("ice_level must be one of: no ice, less ice, normal ice")
 end

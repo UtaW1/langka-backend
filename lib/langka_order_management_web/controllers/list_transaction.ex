@@ -24,7 +24,7 @@ defmodule LangkaOrderManagementWeb.ListTransaction do
         id: &1.id,
         invoice_id: &1.invoice_id,
         bill_price_as_usd: &1.bill_price_as_usd,
-        table_number: &1.table_number,
+        table_number: &1.seating_table.table_number,
         user_id: &1.user_id,
         promotion_id: &1.promotion_apply_id,
         inserted_at: &1.inserted_at,
@@ -32,7 +32,10 @@ defmodule LangkaOrderManagementWeb.ListTransaction do
           %{
             product_id: pt.product_id,
             name: pt.product.name,
-            quantity: pt.quantity
+            quantity: pt.quantity,
+            sugar_level: pt.sugar_level,
+            ice_level: pt.ice_level,
+            order_note: pt.order_note
           }
         end)
       })

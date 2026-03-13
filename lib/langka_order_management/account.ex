@@ -20,7 +20,7 @@ defmodule LangkaOrderManagement.Account do
       Transaction
       |> where([t], t.status == ^"completed")
       |> ContextUtil.list(filters)
-      |> preload([t], product_transactions: :product)
+      |> preload([t], [product_transactions: :product, seating_table: []])
 
     transactions = Repo.all(query)
 
@@ -103,7 +103,7 @@ defmodule LangkaOrderManagement.Account do
     args = %{
       status: "pending",
       invoice_id: args["invoice_id"],
-      table_number: args["table_number"],
+      seating_table_id: args["seating_table_id"],
       bill_price_as_usd: final_price,
       user_id: nil,
       promotion_apply_id: nil
@@ -113,12 +113,7 @@ defmodule LangkaOrderManagement.Account do
     |> Ecto.Multi.put(:products_orders, enriched_products_orders)
     |> Ecto.Multi.insert(:pending_transaction, Transaction.changeset(%Transaction{}, args))
     |> Ecto.Multi.insert_all(:transaction_product, ProductTransaction, fn %{pending_transaction: transaction} ->
-      Enum.map(products_orders, & %{
-        product_id: &1["product_id"],
-        transaction_id: transaction.id,
-        quantity: &1["quantity"],
-        inserted_at: NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
-      })
+      build_products_transaction_rows(products_orders, transaction.id)
     end)
     |> Repo.transact()
   end
@@ -159,7 +154,7 @@ defmodule LangkaOrderManagement.Account do
     args = %{
       status: :pending,
       invoice_id: args["invoice_id"],
-      table_number: args["table_number"],
+      seating_table_id: args["seating_table_id"],
       bill_price_as_usd: final_price,
       user_id: user_id,
       promotion_apply_id:
@@ -175,11 +170,7 @@ defmodule LangkaOrderManagement.Account do
     |> Ecto.Multi.put(:promotion_tracker_args, promotion_tracker)
     |> Ecto.Multi.insert(:pending_transaction, Transaction.changeset(%Transaction{}, args))
     |> Ecto.Multi.insert_all(:transaction_product, ProductTransaction, fn %{pending_transaction: transaction} ->
-      Enum.map(products_orders, & %{
-        product_id: &1.product_id,
-        transaction_id: transaction.id,
-        quantity: &1.quantity
-      })
+      build_products_transaction_rows(products_orders, transaction.id)
     end)
     |> Ecto.Multi.run(:user_promotion_tracker, fn repo, %{promotion_tracker_args: args} ->
       if is_map(args) do
@@ -218,6 +209,32 @@ defmodule LangkaOrderManagement.Account do
         else
           {:error, :unauthorized}
         end
+    end
+  end
+
+  defp build_products_transaction_rows(products_orders, transaction_id) do
+    inserted_at = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+
+    Enum.map(products_orders, fn product_order ->
+      %{
+        product_id: get_order_value(product_order, "product_id"),
+        transaction_id: transaction_id,
+        quantity: get_order_value(product_order, "quantity"),
+        sugar_level: get_order_value(product_order, "sugar_level"),
+        ice_level: get_order_value(product_order, "ice_level"),
+        order_note: get_order_value(product_order, "order_note"),
+        inserted_at: inserted_at
+      }
+    end)
+  end
+
+  defp get_order_value(product_order, key) do
+    case Map.fetch(product_order, key) do
+      {:ok, value} ->
+        value
+
+      :error ->
+        Map.get(product_order, String.to_atom(key))
     end
   end
 end

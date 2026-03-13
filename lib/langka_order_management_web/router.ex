@@ -23,10 +23,13 @@ defmodule LangkaOrderManagementWeb.Router do
   end
 
   scope "/api/admin" do
-    pipe_through [:api, :admin]
+    pipe_through [:api]
 
     get "/list_transaction", FormRequest, LangkaOrderManagementWeb.ListTransaction
+    get "/list_table_transaction", FormRequest, LangkaOrderManagementWeb.ListTableTransaction
     get "/list_user", FormRequest, LangkaOrderManagementWeb.ListUser
+    get "/metrics/product_monthly", FormRequest, LangkaOrderManagementWeb.ListProductMonthlyMetric
+    get "/metrics/table_monthly", FormRequest, LangkaOrderManagementWeb.ListTableMonthlyMetric
 
     get "/export_transaction", FormRequest, LangkaOrderManagementWeb.ExportTransaction
 

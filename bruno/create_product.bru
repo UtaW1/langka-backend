@@ -6,7 +6,7 @@ meta {
 
 post {
   url: http://localhost:4000/api/admin/products
-  body: json
+  body: multipartForm
   auth: none
 }
 
@@ -21,4 +21,12 @@ body:json {
     "product_category_id": 1, 
     "price_as_usd": 5.0
   }
+}
+
+body:multipart-form {
+  name: bezos
+  description: A rich meal
+  product_category_id: 1
+  price_as_usd: 4.5
+  product_image: @file(/home/kul/Downloads/avatar-image.jpg)
 }

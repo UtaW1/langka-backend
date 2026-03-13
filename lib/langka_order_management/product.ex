@@ -6,7 +6,8 @@ defmodule LangkaOrderManagement.Product do
   alias LangkaOrderManagement.Product.{
     Product,
     ProductCategory,
-    ProductPrice
+    ProductPrice,
+    ProductTransaction
   }
 
   @bucketname "product-images"
@@ -182,6 +183,25 @@ defmodule LangkaOrderManagement.Product do
       |> select([pc], count(fragment("DISTINCT ?", pc.id)))
       |> Repo.one()
     }
+  end
+
+  def list_monthly_product_quantity_metrics do
+    start_date = Date.beginning_of_month(Date.utc_today())
+    end_date = Date.end_of_month(Date.utc_today())
+
+    ProductTransaction
+    |> join(:inner, [pt], t in assoc(pt, :transaction))
+    |> join(:inner, [pt, _t], p in assoc(pt, :product))
+    |> where([_pt, t], t.status == ^"completed")
+    |> where([_pt, t], type(t.inserted_at, :date) >= ^start_date and type(t.inserted_at, :date) <= ^end_date)
+    |> group_by([_pt, _t, p], [p.id, p.name])
+    |> select([pt, _t, p], %{
+      product_id: p.id,
+      product_name: p.name,
+      total_quantity: sum(pt.quantity)
+    })
+    |> order_by([pt, _t, p], [desc: sum(pt.quantity), asc: p.name])
+    |> Repo.all()
   end
 
   defp products_with_latest_price_query do
