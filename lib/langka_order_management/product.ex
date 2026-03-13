@@ -218,14 +218,20 @@ defmodule LangkaOrderManagement.Product do
     })
   end
 
-  defp filter_by_product_category(query, %{"product_category_ids" => pc_ids}),
+  defp filter_by_product_category(query, %{"product_category_ids" => pc_ids}) when is_list(pc_ids),
     do: where(query, [_, product_category: pc], pc.id in ^pc_ids)
 
-  defp filter_by_product_category(query, %{"product_category_id" => pc_id}),
+  defp filter_by_product_category(query, %{"product_category_id" => pc_id}) when not is_nil(pc_id),
     do: where(query, [_, product_category: pc], pc.id == ^pc_id)
 
-  defp filter_by_product_category(query, %{"category_id" => category_id}),
+  defp filter_by_product_category(query, %{"category_id" => category_id}) when not is_nil(category_id),
     do: where(query, [_, product_category: pc], pc.id == ^category_id)
+
+  defp filter_by_product_category(query, %{"product_category_ids" => nil}), do: query
+
+  defp filter_by_product_category(query, %{"product_category_id" => nil}), do: query
+
+  defp filter_by_product_category(query, %{"category_id" => nil}), do: query
 
   defp filter_by_product_category(query, _), do: query
 
