@@ -37,7 +37,8 @@ defmodule LangkaOrderManagementWeb.UpdateSeatingTable do
       %{
         id: table.id,
         table_number: table.table_number,
-        seating_count: table.seating_count
+        seating_count: table.seating_count,
+        inserted_at: table.inserted_at
       }
     end
   end

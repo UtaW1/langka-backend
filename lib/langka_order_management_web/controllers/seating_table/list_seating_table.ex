@@ -37,7 +37,8 @@ defmodule LangkaOrderManagementWeb.ListSeatingTable do
       Enum.map(tables, & %{
         id: &1.id,
         table_number: &1.table_number,
-        seating_count: &1.seating_count
+        seating_count: &1.seating_count,
+        inserted_at: &1.inserted_at
       })
     end
   end
