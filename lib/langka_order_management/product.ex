@@ -224,6 +224,9 @@ defmodule LangkaOrderManagement.Product do
   defp filter_by_product_category(query, %{"product_category_id" => pc_id}),
     do: where(query, [_, product_category: pc], pc.id == ^pc_id)
 
+  defp filter_by_product_category(query, %{"category_id" => category_id}),
+    do: where(query, [_, product_category: pc], pc.id == ^category_id)
+
   defp filter_by_product_category(query, _), do: query
 
   defp load_latest_price(query, %{"is_load_latest_price" => true}) do

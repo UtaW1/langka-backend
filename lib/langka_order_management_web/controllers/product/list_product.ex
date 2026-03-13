@@ -12,7 +12,8 @@ defmodule LangkaOrderManagementWeb.ListProduct do
       "ids_in" => [nullable: true, required: false, list: [required: false, nullable: true, cast: :integer, type: :integer, min: 1]],
       "ids_not_in" => [nullable: true, required: false, list: [required: false, nullable: true, cast: :integer, type: :integer, min: 1]],
       "is_removed" => [required: false, nullable: true, custom: &ControllerUtils.validate_boolean/1],
-      "is_load_latest_price" => [required: false, nullable: true, custom: &ControllerUtils.validate_boolean/1]
+      "is_load_latest_price" => [required: false, nullable: true, custom: &ControllerUtils.validate_boolean/1],
+      "category_id" => [required: false, nullable: true, cast: :integer, type: :integer, min: 1]
     }
   end
 
