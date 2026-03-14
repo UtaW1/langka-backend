@@ -59,7 +59,9 @@ defmodule LangkaOrderManagement.Product do
   end
 
   def delete_product_image(%Product{image_url: "" <> url}) do
-    case Supabase.remove(@bucketname, url) do
+    encoded_url = URI.encode(url)
+
+    case Supabase.remove(@bucketname, encoded_url) do
       {:ok, nil} ->
         {:ok, nil}
 
@@ -341,7 +343,9 @@ defmodule LangkaOrderManagement.Product do
       |> String.slice(0..18)
       |> String.replace(~r/[^0-9]/, "")
 
-    filename = "product-#{id}-#{name}:#{Nanoid.generate(32)}:#{timestamp}"
+    normalized_name = String.replace(name, " ", "-")
+
+    filename = "product-#{id}-#{normalized_name}:#{Nanoid.generate(32)}:#{timestamp}"
 
     content_type =
       content_type
@@ -350,9 +354,11 @@ defmodule LangkaOrderManagement.Product do
 
     file_path = "product/#{filename}.#{content_type}"
 
+    encoded_file_path = URI.encode(file_path)
+
     tmp_path = File.read!(tmp_path)
 
-    case Supabase.upload(@bucketname, tmp_path, file_path) do
+    case Supabase.upload(@bucketname, tmp_path, encoded_file_path) do
       {:ok, _} ->
         product
         |> Product.changeset(%{image_url: file_path})
