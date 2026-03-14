@@ -3,7 +3,7 @@ import Config
 # Configure your database
 config :langka_order_management, LangkaOrderManagement.Repo,
   username: "postgres",
-  password: "postgres",
+  password: "psqlzz",
   hostname: "localhost",
   database: "langka_order_management_dev",
   stacktrace: true,

@@ -21,8 +21,9 @@ defmodule LangkaOrderManagement.Account.User do
     user
     |> cast(attrs, [:username, :phone_number, :password, :role])
     |> validate_exclusion(:role, ["admin"])
-    |> validate_required([:username, :password])
+    |> validate_required([:username, :phone_number])
     |> validate_length(:password, min: 8)
+    |> unique_constraint(:phone_number)
     |> put_hashed_password()
   end
 

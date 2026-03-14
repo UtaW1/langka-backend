@@ -6,7 +6,8 @@ defmodule LangkaOrderManagementWeb.MakePendingOrder do
 
   def rules(_) do
     %{
-      "user_id" => [required: false, nullable: true, type: :string],
+      "name" => [required: true, nullable: false, type: :string],
+      "phone_number" => [required: true, nullable: false, type: :string],
       "products_orders" => [required: true, nullable: false, type: :list,
         list: [
           required: true,
@@ -28,7 +29,7 @@ defmodule LangkaOrderManagementWeb.MakePendingOrder do
   def perform(conn, args) do
     with false <- SeatingTable.pending_order_table_limit(args["seating_table_id"]),
          {:ok, %{pending_transaction: transaction, products_orders: products_orders} = multi_res} when is_map(multi_res) <- Account.make_pending_order(args),
-         {:ok, _message} <- Telegram.send_order_payload_to_channel(args["user_id"], transaction, products_orders)
+         {:ok, _message} <- Telegram.send_order_payload_to_channel(args["name"], args["phone_number"], transaction, products_orders)
         do
           conn
           |> Phoenix.Controller.put_view(__MODULE__.View)

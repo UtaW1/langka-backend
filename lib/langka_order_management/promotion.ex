@@ -43,10 +43,16 @@ defmodule LangkaOrderManagement.Promotion do
   def determine_promotion_apply(user_id) do
     continous_promotion = get_a_user_latest_continous_promotion_for_transaction(user_id)
 
-    if continous_promotion.transaction_count >= continous_promotion.promotion.transaction_count_to_get_discount do
-      continous_promotion
-    else
-      nil
+    case continous_promotion do
+      %UserPromotionTracker{promotion: %Promotion{} = promotion, transaction_count: transaction_count} ->
+        if transaction_count >= promotion.transaction_count_to_get_discount do
+          promotion
+        else
+          nil
+        end
+
+      _ ->
+        nil
     end
   end
 

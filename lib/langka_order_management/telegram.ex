@@ -9,7 +9,7 @@ defmodule LangkaOrderManagement.Telegram do
     Application.get_env(:nadia, :token)
   end
 
-  def send_order_payload_to_channel(user_id, transaction, products_orders) do
+  def send_order_payload_to_channel(customer_name, phone_number, transaction, products_orders) do
     items_list =
       Enum.map_join(products_orders, "\n", fn product_order ->
         product_name = product_order["product_detail"].name
@@ -34,7 +34,7 @@ defmodule LangkaOrderManagement.Telegram do
 
     message = """
       *NEW ORDER RECEIVED!*
-      Customer: #{if user_id, do: user_id, else: "Guest"}
+      Customer: #{customer_name} (#{phone_number})
       Table: #{transaction.seating_table_id}
       Items:
       #{items_list}

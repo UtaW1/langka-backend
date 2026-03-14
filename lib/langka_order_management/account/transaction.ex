@@ -24,10 +24,11 @@ defmodule LangkaOrderManagement.Account.Transaction do
 
   def changeset(transaction, attrs) do
     transaction
-    |> cast(attrs, [:status, :invoice_id, :bill_price_as_usd, :user_id, :seating_table_id])
+    |> cast(attrs, [:status, :invoice_id, :bill_price_as_usd, :user_id, :seating_table_id, :promotion_apply_id])
     |> validate_required([:status, :bill_price_as_usd, :seating_table_id])
     |> validate_number(:bill_price_as_usd, greater_than_or_equal_to: 0)
     |> validate_inclusion(:status, ["pending", "cancelled"])
+    |> foreign_key_constraint(:user_id)
     |> foreign_key_constraint(:promotion_apply_id)
   end
 
