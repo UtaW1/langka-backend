@@ -1,6 +1,46 @@
 defmodule LangkaOrderManagementWeb.ControllerUtils do
   alias LangkaOrderManagement.Supabase
 
+  def validate_phone_number(%{value: nil}), do: Validate.Validator.success(nil)
+
+  def validate_phone_number(%{value: "" <> phone}) do
+    case normalize_kh_phone(phone) do
+      {:ok, normalized} ->
+        Validate.Validator.success(normalized)
+
+      {:error, msg} ->
+        Validate.Validator.error(msg)
+    end
+  end
+
+  def validate_phone_number(%{value: _}), do: Validate.Validator.error("value must be a non-empty string")
+
+  defp normalize_kh_phone(phone) when is_binary(phone) do
+    digits = String.replace(phone, ~r/[^0-9]/, "")
+
+    cond do
+      String.starts_with?(digits, "855") and valid_kh_length?(digits, 3) ->
+        {:ok, "+#{digits}"}
+
+      String.starts_with?(digits, "0") and valid_kh_length?(digits, 0) ->
+        {:ok, "+855" <> String.slice(digits, 1..-1//1)}
+
+      valid_kh_length?(digits, 0) ->
+        {:ok, "+855" <> digits}
+
+      true ->
+        {:error, "invalid phone number"}
+    end
+  end
+
+  defp normalize_kh_phone(_phone), do: {:error, "phone number must be a string"}
+
+  defp valid_kh_length?(digits, prefix_len) do
+    len = String.length(digits) - prefix_len
+
+    len in [8, 9, 10]
+  end
+
   def render_error(conn, status, render, "" <> err_msg) do
     conn
     |> Plug.Conn.put_status(status)

@@ -1,5 +1,6 @@
 defmodule LangkaOrderManagementWeb.MakePendingOrder do
   alias LangkaOrderManagement.{Account, Telegram, SeatingTable}
+  alias LangkaOrderManagementWeb.ControllerUtils
 
   @allowed_sugar_levels [0, 25, 50, 75, 100, 125]
   @allowed_ice_levels ["no ice", "less ice", "normal ice"]
@@ -7,7 +8,7 @@ defmodule LangkaOrderManagementWeb.MakePendingOrder do
   def rules(_) do
     %{
       "name" => [required: true, nullable: false, type: :string],
-      "phone_number" => [required: true, nullable: false, type: :string],
+      "phone_number" => [required: true, nullable: false, custom: &ControllerUtils.validate_phone_number/1],
       "products_orders" => [required: true, nullable: false, type: :list,
         list: [
           required: true,
