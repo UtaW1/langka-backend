@@ -1,0 +1,22 @@
+meta {
+  name: update_employee
+  type: http
+  seq: 38
+}
+
+patch {
+  url: http://localhost:4000/api/admin/employees/{{id}}
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "Sok Dara Updated",
+    "phone": "0812345678"
+  }
+}
+
+vars:pre-request {
+  id: 1
+}

@@ -1,0 +1,20 @@
+meta {
+  name: list_inventory_movement
+  type: http
+  seq: 46
+}
+
+get {
+  url: http://localhost:4000/api/admin/inventories/{{inventory_id}}/movements?page_size=10&page_number=0
+  body: none
+  auth: none
+}
+
+params:query {
+  page_size: 10
+  page_number: 0
+}
+
+vars:pre-request {
+  inventory_id: 1
+}

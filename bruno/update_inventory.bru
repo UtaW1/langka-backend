@@ -1,0 +1,22 @@
+meta {
+  name: update_inventory
+  type: http
+  seq: 43
+}
+
+patch {
+  url: http://localhost:4000/api/admin/inventories/{{id}}
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "Milk",
+    "note": "Fridge stock updated"
+  }
+}
+
+vars:pre-request {
+  id: 1
+}

@@ -69,6 +69,17 @@ defmodule LangkaOrderManagementWeb.Router do
       patch "/:id", FormRequest, LangkaOrderManagementWeb.UpdateEmployee
       delete "/:id", FormRequest, LangkaOrderManagementWeb.DeleteEmployee
     end
+
+    scope "/inventories" do
+      post "/", FormRequest, LangkaOrderManagementWeb.CreateInventory
+      get "/", FormRequest, LangkaOrderManagementWeb.ListInventory
+      get "/:id", FormRequest, LangkaOrderManagementWeb.GetInventory
+      patch "/:id", FormRequest, LangkaOrderManagementWeb.UpdateInventory
+      delete "/:id", FormRequest, LangkaOrderManagementWeb.DeleteInventory
+
+      post "/:inventory_id/movements", FormRequest, LangkaOrderManagementWeb.CreateInventoryMovement
+      get "/:inventory_id/movements", FormRequest, LangkaOrderManagementWeb.ListInventoryMovement
+    end
   end
 
   scope "/api/auth", LangkaOrderManagementWeb do

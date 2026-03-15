@@ -1,0 +1,22 @@
+meta {
+  name: create_inventory_movement
+  type: http
+  seq: 45
+}
+
+post {
+  url: http://localhost:4000/api/admin/inventories/{{inventory_id}}/movements
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "movement_type": "in",
+    "quantity": 10
+  }
+}
+
+vars:pre-request {
+  inventory_id: 1
+}
