@@ -61,6 +61,14 @@ defmodule LangkaOrderManagementWeb.Router do
       delete "/:id", FormRequest, LangkaOrderManagementWeb.DeletePromotion
       post "/", FormRequest, LangkaOrderManagementWeb.CreatePromotion
     end
+
+    scope "/employees" do
+      post "/", FormRequest, LangkaOrderManagementWeb.CreateEmployee
+      get "/", FormRequest, LangkaOrderManagementWeb.ListEmployee
+      get "/:id", FormRequest, LangkaOrderManagementWeb.GetEmployee
+      patch "/:id", FormRequest, LangkaOrderManagementWeb.UpdateEmployee
+      delete "/:id", FormRequest, LangkaOrderManagementWeb.DeleteEmployee
+    end
   end
 
   scope "/api/auth", LangkaOrderManagementWeb do
