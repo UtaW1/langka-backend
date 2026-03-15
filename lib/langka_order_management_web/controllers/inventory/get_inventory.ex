@@ -29,6 +29,7 @@ defmodule LangkaOrderManagementWeb.GetInventory do
         id: inventory.id,
         name: inventory.name,
         note: inventory.note,
+        image_url: inventory.image_url,
         removed_datetime: inventory.removed_datetime,
         actual_quantity: actual_quantity,
         inserted_at: inventory.inserted_at,

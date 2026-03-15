@@ -2,8 +2,10 @@ defmodule LangkaOrderManagement.Inventory do
   import Ecto.Query, warn: false
 
   alias Ecto.Multi
-  alias LangkaOrderManagement.{ContextUtil, Repo}
+  alias LangkaOrderManagement.{ContextUtil, Repo, Supabase}
   alias LangkaOrderManagement.Inventory.{Inventory, InventoryMovement}
+
+  @bucketname "inventory-images"
 
   def list_inventories_with_paging(filters) do
     base_query =
@@ -69,6 +71,20 @@ defmodule LangkaOrderManagement.Inventory do
     |> Repo.insert()
   end
 
+  def delete_inventory_image(%Inventory{image_url: "" <> url}) do
+    encoded_url = URI.encode(url)
+
+    case Supabase.remove(@bucketname, encoded_url) do
+      {:ok, nil} ->
+        {:ok, nil}
+
+      err ->
+        err
+    end
+  end
+
+  def delete_inventory_image(_), do: {:ok, nil}
+
   def update_inventory(%Inventory{} = inventory, attrs) do
     inventory
     |> Inventory.changeset(attrs)
@@ -133,6 +149,41 @@ defmodule LangkaOrderManagement.Inventory do
   end
 
   def create_inventory_movement(_), do: {:error, :invalid_params}
+
+  def upload_inventory_image(%Plug.Upload{path: tmp_path, content_type: content_type}, %Inventory{name: name, id: id} = inventory) do
+    timestamp =
+      DateTime.utc_now()
+      |> DateTime.to_iso8601()
+      |> String.slice(0..18)
+      |> String.replace(~r/[^0-9]/, "")
+
+    normalized_name = String.replace(name, " ", "-")
+
+    filename = "inventory-#{id}-#{normalized_name}:#{Nanoid.generate(32)}:#{timestamp}"
+
+    content_type =
+      content_type
+      |> String.split("/")
+      |> List.last()
+
+    file_path = "inventory/#{filename}.#{content_type}"
+
+    encoded_file_path = URI.encode(file_path)
+
+    tmp_path = File.read!(tmp_path)
+
+    case Supabase.upload(@bucketname, tmp_path, encoded_file_path) do
+      {:ok, _} ->
+        inventory
+        |> Inventory.changeset(%{image_url: file_path})
+        |> Repo.update()
+
+      {:error, reason} ->
+        {:error, %{upload_error: reason}}
+    end
+  end
+
+  def upload_inventory_image(_, %Inventory{} = inventory), do: {:ok, inventory}
 
   def list_inventory_movements_with_paging(%{"inventory_id" => inventory_id} = filters) do
     query =

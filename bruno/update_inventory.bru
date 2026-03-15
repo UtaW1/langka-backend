@@ -6,15 +6,14 @@ meta {
 
 patch {
   url: http://localhost:4000/api/admin/inventories/{{id}}
-  body: json
+  body: multipartForm
   auth: none
 }
 
-body:json {
-  {
-    "name": "Milk",
-    "note": "Fridge stock updated"
-  }
+body:multipart-form {
+  name: Milk
+  note: Fridge stock updated
+  inventory_image: @file(/home/kul/Downloads/avatar-image.jpg)
 }
 
 vars:pre-request {

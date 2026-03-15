@@ -6,13 +6,12 @@ meta {
 
 post {
   url: http://localhost:4000/api/admin/inventories
-  body: json
+  body: multipartForm
   auth: none
 }
 
-body:json {
-  {
-    "name": "Milk",
-    "note": "Fridge stock"
-  }
+body:multipart-form {
+  name: Milk
+  note: Fridge stock
+  inventory_image: @file(/home/kul/Downloads/avatar-image.jpg)
 }

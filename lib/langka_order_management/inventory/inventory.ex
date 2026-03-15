@@ -5,6 +5,7 @@ defmodule LangkaOrderManagement.Inventory.Inventory do
   schema "inventories" do
     field :name, :string
     field :note, :string
+    field :image_url, :string
     field :removed_datetime, :utc_datetime
 
     has_many :movements, LangkaOrderManagement.Inventory.InventoryMovement
@@ -14,7 +15,7 @@ defmodule LangkaOrderManagement.Inventory.Inventory do
 
   def changeset(inventory, attrs) do
     inventory
-    |> cast(attrs, [:name, :note, :removed_datetime])
+    |> cast(attrs, [:name, :note, :image_url, :removed_datetime])
     |> validate_required([:name])
   end
 end
