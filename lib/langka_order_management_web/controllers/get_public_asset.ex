@@ -1,12 +1,13 @@
 defmodule LangkaOrderManagementWeb.GetPublicAsset do
   alias LangkaOrderManagement.{Supabase}
 
-  @bucketname "product-images"
+  @bucketname ["product-images", "inventory-images"]
 
   def rules(_) do
     %{
       "image_url" => [required: true, nullable: false, cast: :string, type: :string],
-      "image_transform" => [required: false, nullable: true, type: :map]
+      "image_transform" => [required: false, nullable: true, type: :map],
+      "bucket_name" => [required: true, nullable: false, type: :string, in: @bucketname]
     }
   end
 
