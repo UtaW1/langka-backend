@@ -16,6 +16,5 @@ defmodule LangkaOrderManagement.Inventory.Inventory do
   def changeset(inventory, attrs) do
     inventory
     |> cast(attrs, [:name, :note, :image_url, :removed_datetime])
-    |> validate_required([:name])
   end
 end
