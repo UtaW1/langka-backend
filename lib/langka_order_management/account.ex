@@ -76,14 +76,36 @@ defmodule LangkaOrderManagement.Account do
   def get_transaction_by_id(id) do
     Transaction
     |> where([t], t.id == ^id)
-    |> preload([t], [product_transactions: :product, seating_table: []])
+    |> preload([t], [:employee, product_transactions: :product, seating_table: []])
     |> Repo.one()
   end
+
+  def assign_employee_to_transaction(%Transaction{status: "pending", employee_id: nil} = transaction, employee_id)
+      when is_integer(employee_id) do
+    transaction
+    |> Transaction.assign_employee_changeset(%{employee_id: employee_id})
+    |> Repo.update()
+  end
+
+  def assign_employee_to_transaction(%Transaction{status: "pending", employee_id: employee_id} = transaction, employee_id)
+      when is_integer(employee_id) do
+    {:ok, transaction}
+  end
+
+  def assign_employee_to_transaction(%Transaction{status: "pending", employee_id: _existing}, _employee_id),
+    do: {:error, :transaction_already_assigned}
+
+  def assign_employee_to_transaction(_transaction, _employee_id),
+    do: {:error, :transaction_in_non_processable_state}
 
   def complete_order_on_webhook_callback(%Transaction{status: "pending"} = transaction) do
     transaction
     |> Transaction.succsesful_transaction_changeset(%{status: "completed"})
     |> Repo.update()
+    |> case do
+      {:ok, updated} -> {:ok, Repo.preload(updated, :employee)}
+      error -> error
+    end
   end
 
   def complete_order_on_webhook_callback(_), do: {:error, :transaction_in_non_processable_state}
@@ -92,6 +114,10 @@ defmodule LangkaOrderManagement.Account do
     transaction
     |> Transaction.cancel_changeset(%{status: "cancelled"})
     |> Repo.update()
+    |> case do
+      {:ok, updated} -> {:ok, Repo.preload(updated, :employee)}
+      error -> error
+    end
   end
 
   def cancel_order_on_webhook_callback(_), do: {:error, :transaction_in_non_processable_state}

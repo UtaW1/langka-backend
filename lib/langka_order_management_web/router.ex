@@ -110,6 +110,8 @@ defmodule LangkaOrderManagementWeb.Router do
 
     get "/promotion", FormRequest, LangkaOrderManagementWeb.GetActivePromotion
 
+    get "/transaction/stream", LangkaOrderManagementWeb.TransactionStream, :stream
+
     post "/public_bucket_asset", FormRequest, LangkaOrderManagementWeb.GetPublicAsset
   end
 

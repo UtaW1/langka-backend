@@ -3,6 +3,13 @@ defmodule LangkaOrderManagement.Employee do
 
   alias LangkaOrderManagement.{ContextUtil, Employee.Employee, Repo}
 
+  def list_active_employees() do
+    Employee
+    |> where([e], is_nil(e.removed_datetime))
+    |> order_by([e], asc: e.name)
+    |> Repo.all()
+  end
+
   def list_employees_with_paging(filters) do
     query =
       Employee

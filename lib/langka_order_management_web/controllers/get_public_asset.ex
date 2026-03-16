@@ -15,7 +15,7 @@ defmodule LangkaOrderManagementWeb.GetPublicAsset do
     args = %{
       file_path: args["image_url"],
       image_transform: args["image_transform"],
-      bucket_name: @bucketname
+      bucket_name: args["bucket_name"]
     }
 
     with {:ok, download_url} <- Supabase.get_public_asset(args) do
