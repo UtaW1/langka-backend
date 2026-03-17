@@ -19,6 +19,7 @@ defmodule LangkaOrderManagementWeb.TransactionStream do
       conn
       |> put_resp_header("content-type", "text/event-stream")
       |> put_resp_header("cache-control", "no-cache")
+      |> put_resp_header("connection", "keep-alive")
       |> put_resp_header("x-accel-buffering", "no")
       |> stream_events(transaction_id)
     else
@@ -28,6 +29,12 @@ defmodule LangkaOrderManagementWeb.TransactionStream do
     end
   end
 
+  def stream(conn, _params) do
+    conn
+    |> put_status(400)
+    |> json(%{"error" => "transaction_id is required"})
+  end
+
   defp subscribe_to_transaction(transaction_id) do
     Logger.info("Client subscribed to transaction: #{transaction_id}")
     Phoenix.PubSub.subscribe(LangkaOrderManagement.PubSub, "#{@topic}:#{transaction_id}")
@@ -35,7 +42,13 @@ defmodule LangkaOrderManagementWeb.TransactionStream do
 
   defp stream_events(conn, transaction_id) do
     conn = send_chunked(conn, 200)
-    stream_loop(conn, transaction_id)
+
+    with {:ok, conn} <- chunk(conn, "retry: 3000\n\n"),
+         {:ok, conn} <- chunk(conn, ": connected to transaction stream\n\n") do
+      stream_loop(conn, transaction_id)
+    else
+      _ -> conn
+    end
   end
 
   defp stream_loop(conn, transaction_id) do
@@ -75,13 +88,15 @@ defmodule LangkaOrderManagementWeb.TransactionStream do
 
   defp encode_event(event_type, event_data) do
     try do
+      event_name = event_name(event_type)
+
       payload = Jason.encode!(%{
-        type: Atom.to_string(event_type),
+        type: event_name,
         data: event_data,
         timestamp: DateTime.utc_now() |> DateTime.to_iso8601()
       })
 
-      {:ok, "event: #{event_type}\ndata: #{payload}\n\n"}
+      {:ok, "event: #{event_name}\ndata: #{payload}\n\n"}
     rescue
       e ->
         {:error, e}
@@ -113,4 +128,8 @@ defmodule LangkaOrderManagementWeb.TransactionStream do
       {:transaction_event, event_type, event_data}
     )
   end
+
+  defp event_name(event_type) when is_atom(event_type), do: Atom.to_string(event_type)
+  defp event_name(event_type) when is_binary(event_type), do: event_type
+  defp event_name(event_type), do: to_string(event_type)
 end

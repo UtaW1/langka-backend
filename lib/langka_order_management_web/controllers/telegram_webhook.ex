@@ -2,6 +2,7 @@ defmodule LangkaOrderManagementWeb.TelegramWebhook do
   require Logger
   alias LangkaOrderManagement.Account
   alias LangkaOrderManagement.{Employee, Telegram}
+  alias LangkaOrderManagementWeb.TransactionStream
 
   def rules(_) do
     %{
@@ -15,7 +16,7 @@ defmodule LangkaOrderManagementWeb.TelegramWebhook do
         with {employee_id, ""} <- Integer.parse(employee_id_str),
              transaction when not is_nil(transaction) <- Account.get_transaction_by_id(transaction_id),
              employee when not is_nil(employee) <- Employee.get_employee(employee_id),
-             {:ok, _updated_transaction} <- Account.assign_employee_to_transaction(transaction, employee_id)
+             {:ok, updated_transaction} <- Account.assign_employee_to_transaction(transaction, employee_id)
         do
           employees = Employee.list_active_employees()
           updated_text = Telegram.update_assigned_employee_line(message["text"] || "", employee.name)
@@ -25,6 +26,14 @@ defmodule LangkaOrderManagementWeb.TelegramWebhook do
             parse_mode: "Markdown",
             reply_markup: %{inline_keyboard: keyboard}
           )
+
+          TransactionStream.publish_event(updated_transaction.id, :assigned, %{
+            status: updated_transaction.status,
+            message: "#{employee.name} is now preparing your order",
+            employee_id: employee.id,
+            employee_name: employee.name,
+            transaction_id: updated_transaction.id
+          })
 
           Nadia.answer_callback_query(callback_id, text: "Assigned to #{employee.name}")
           Plug.Conn.send_resp(conn, 200, "")
@@ -60,6 +69,14 @@ defmodule LangkaOrderManagementWeb.TelegramWebhook do
       employee_name = updated_transaction.employee && updated_transaction.employee.name
       completion_msg = if employee_name, do: "Order #{id} is completed by #{employee_name}!", else: "Order #{id} is completed!"
 
+      TransactionStream.publish_event(updated_transaction.id, :completed, %{
+        status: updated_transaction.status,
+        message: completion_msg,
+        employee_id: updated_transaction.employee_id,
+        employee_name: employee_name,
+        transaction_id: updated_transaction.id
+      })
+
       Nadia.edit_message_text(message["chat"]["id"], message["message_id"], "", completion_msg)
       Plug.Conn.send_resp(conn, 200, "")
     else
@@ -83,6 +100,14 @@ defmodule LangkaOrderManagementWeb.TelegramWebhook do
     do
       employee_name = updated_transaction.employee && updated_transaction.employee.name
       cancel_msg = if employee_name, do: "Order #{id} is cancelled by #{employee_name}!", else: "Order #{id} is cancelled!"
+
+      TransactionStream.publish_event(updated_transaction.id, :cancelled, %{
+        status: updated_transaction.status,
+        message: cancel_msg,
+        employee_id: updated_transaction.employee_id,
+        employee_name: employee_name,
+        transaction_id: updated_transaction.id
+      })
 
       Nadia.edit_message_text(message["chat"]["id"], message["message_id"], "", cancel_msg)
       Plug.Conn.send_resp(conn, 200, "")

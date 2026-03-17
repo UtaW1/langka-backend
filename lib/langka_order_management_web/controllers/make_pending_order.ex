@@ -1,5 +1,6 @@
 defmodule LangkaOrderManagementWeb.MakePendingOrder do
   alias LangkaOrderManagement.{Account, Telegram, SeatingTable}
+  alias LangkaOrderManagementWeb.TransactionStream
   alias LangkaOrderManagementWeb.ControllerUtils
 
   @allowed_sugar_levels [0, 25, 50, 75, 100, 125]
@@ -32,6 +33,12 @@ defmodule LangkaOrderManagementWeb.MakePendingOrder do
          {:ok, %{pending_transaction: transaction, products_orders: products_orders} = multi_res} when is_map(multi_res) <- Account.make_pending_order(args),
          {:ok, _message} <- Telegram.send_order_payload_to_channel(args["name"], args["phone_number"], transaction, products_orders)
         do
+          TransactionStream.publish_event(transaction.id, :queued, %{
+            status: "pending",
+            message: "Your order is in queue",
+            transaction_id: transaction.id
+          })
+
           conn
           |> Phoenix.Controller.put_view(__MODULE__.View)
           |> Phoenix.Controller.render("make_pending_order.json", data: {transaction, products_orders})
