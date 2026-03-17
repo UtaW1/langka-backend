@@ -130,7 +130,9 @@ defmodule LangkaOrderManagement.Promotion do
             transaction_count: 1,
             used_up: false,
             user_id: user_id,
-            promotion_id: latest.id
+            promotion_id: latest.id,
+            inserted_at: NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second),
+            updated_at: NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
           }
         }
 
@@ -142,7 +144,9 @@ defmodule LangkaOrderManagement.Promotion do
               transaction_count: transaction_count,
               used_up: true,
               user_id: user_id,
-              promotion_id: promotion.id
+              promotion_id: promotion.id,
+              inserted_at: NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second),
+              updated_at: NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
             }
           }
         else
@@ -152,7 +156,9 @@ defmodule LangkaOrderManagement.Promotion do
               transaction_count: transaction_count + 1,
               used_up: false,
               user_id: user_id,
-              promotion_id: promotion.id
+              promotion_id: promotion.id,
+              inserted_at: NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second),
+              updated_at: NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
             }
           }
         end
