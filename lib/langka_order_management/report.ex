@@ -17,10 +17,21 @@ defmodule LangkaOrderManagement.Report do
         products_bought =
           transaction.product_transactions
           |> Enum.map(fn product_transaction ->
-            product_name = get_in(product_transaction, [:product, :name]) || "unknown_product"
+            product_name =
+              case product_transaction.product do
+                %{name: name} -> name
+                _ -> "unknown_product"
+              end
+
             "#{product_name} x#{product_transaction.quantity}"
           end)
           |> Enum.join(" | ")
+
+        table_number =
+          case transaction.seating_table do
+            %{table_number: number} -> number
+            _ -> nil
+          end
 
         promotion_discount_as_percent =
           transaction.discount_as_percent_applied ||
@@ -33,7 +44,7 @@ defmodule LangkaOrderManagement.Report do
           id: transaction.id,
           invoice_id: transaction.invoice_id,
           user_id: transaction.user_id,
-          table_number: get_in(transaction, [:seating_table, :table_number]),
+          table_number: table_number,
           promotion_apply_id: transaction.promotion_apply_id,
           promotion_discount_as_percent: promotion_discount_as_percent,
           bill_price_before_discount_as_usd: transaction.bill_price_before_discount_as_usd,
