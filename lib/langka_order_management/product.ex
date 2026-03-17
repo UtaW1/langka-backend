@@ -20,7 +20,7 @@ defmodule LangkaOrderManagement.Product do
     Repo.all(ProductCategory)
   end
 
-  def get_product_category!(id), do: Repo.get!(ProductCategory, id)
+  def get_product_category(id), do: Repo.get(ProductCategory, id)
 
   def create_product_category(attrs \\ %{}) do
     %ProductCategory{}
@@ -35,7 +35,9 @@ defmodule LangkaOrderManagement.Product do
   end
 
   def delete_product_category(%ProductCategory{} = category) do
-    Repo.delete(category)
+    category
+    |> ProductCategory.remove_changeset(%{removed_datetime: DateTime.truncate(DateTime.utc_now(), :second), removed_reason: "admin removed"})
+    |> Repo.update()
   end
 
   def change_product_category(%ProductCategory{} = category, attrs \\ %{}) do

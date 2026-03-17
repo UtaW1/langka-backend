@@ -48,6 +48,8 @@ defmodule LangkaOrderManagementWeb.Router do
 
     scope "/categories" do
       post "/", FormRequest, LangkaOrderManagementWeb.CreateCategory
+
+      delete "/:id", FormRequest, LangkaOrderManagementWeb.DeleteCategory
     end
 
     scope "/seating_tables" do

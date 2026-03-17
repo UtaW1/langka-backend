@@ -21,4 +21,10 @@ defmodule LangkaOrderManagement.Product.ProductCategory do
     |> cast(attrs, [:name, :description])
     |> validate_required([:name])
   end
+
+  def remove_changeset(category, attrs) do
+    category
+    |> cast(attrs, [:removed_datetime, :removed_reason])
+    |> validate_required([:removed_datetime])
+  end
 end
