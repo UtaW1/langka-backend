@@ -1,5 +1,6 @@
 defmodule LangkaOrderManagementWeb.ListTransaction do
   alias LangkaOrderManagement.Account
+  alias LangkaOrderManagementWeb.ControllerUtils
 
   def rules(_) do
     %{
@@ -7,7 +8,9 @@ defmodule LangkaOrderManagementWeb.ListTransaction do
       "page_number" => [required: false, nullable: true, cast: :integer, type: :integer, min: 0],
       "cursor_id" => [required: false, nullable: true, cast: :integer, type: :integer, min: 0],
       "status" => [required: false, nullable: true, cast: :string, type: :string, in: ["pending", "completed", "cancelled"]],
-      "employee_id" => [required: false, nullable: true, cast: :integer, type: :integer, min: 1]
+      "employee_id" => [required: false, nullable: true, cast: :integer, type: :integer, min: 1],
+      "start_datetime" => [required: false, nullable: true, custom: &ControllerUtils.validate_iso8601_datetime/1],
+      "end_datetime" => [required: false, nullable: true, custom: &ControllerUtils.validate_iso8601_datetime/1]
     }
   end
 

@@ -101,6 +101,12 @@ defmodule LangkaOrderManagement.ContextUtil do
       {"employee_id", employee_id}, query ->
         where(query, [x], x.employee_id == ^employee_id)
 
+      {"start_datetime", start_datetime}, query ->
+        where(query, [x], x.inserted_at >= ^start_datetime)
+
+      {"end_datetime", end_datetime}, query ->
+        where(query, [x], x.inserted_at <= ^end_datetime)
+
       _, query -> query
     end)
     |> where(^cursor_paging)
