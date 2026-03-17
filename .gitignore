@@ -31,3 +31,4 @@ langka_order_management-*.tar
 .env
 Caddyfile
 
+bruno/send_*
