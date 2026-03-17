@@ -105,18 +105,22 @@ defmodule LangkaOrderManagement.Account do
 
   defp resolve_metric_datetime_range(filters) do
     start_datetime =
-      Map.get_lazy(filters, "start_datetime", fn ->
-        Date.utc_today()
-        |> Date.beginning_of_month()
-        |> DateTime.new!(~T[00:00:00], "Etc/UTC")
-      end)
+      case Map.get(filters, "start_datetime") do
+        %DateTime{} = dt -> dt
+        _ ->
+          Date.utc_today()
+          |> Date.beginning_of_month()
+          |> DateTime.new!(~T[00:00:00], "Etc/UTC")
+      end
 
     end_datetime =
-      Map.get_lazy(filters, "end_datetime", fn ->
-        Date.utc_today()
-        |> Date.end_of_month()
-        |> DateTime.new!(~T[23:59:59], "Etc/UTC")
-      end)
+      case Map.get(filters, "end_datetime") do
+        %DateTime{} = dt -> dt
+        _ ->
+          Date.utc_today()
+          |> Date.end_of_month()
+          |> DateTime.new!(~T[23:59:59], "Etc/UTC")
+      end
 
     {start_datetime, end_datetime}
   end
