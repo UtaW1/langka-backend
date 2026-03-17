@@ -22,21 +22,35 @@ defmodule LangkaOrderManagementWeb.ListTransaction do
 
   defmodule View do
     def render("list_transactions.json", %{data: transactions}) do
-      Enum.map(transactions, & %{
-        id: &1.id,
-        invoice_id: &1.invoice_id,
-        bill_price_as_usd: &1.bill_price_as_usd,
-        bill_price_before_discount_as_usd: &1.bill_price_before_discount_as_usd,
-        bill_price_after_discount_as_usd: &1.bill_price_after_discount_as_usd,
-        discount_amount_as_usd: &1.discount_amount_as_usd,
-        promotion_discount_as_percent: &1.discount_as_percent_applied || (&1 |> Map.get(:promotion_apply, %{}) |> Map.get(:discount_as_percent)),
-        table_number: &1.seating_table.table_number,
-        employee: &1 |> Map.get(:employee, %{}) |> Map.get(:name),
-        status: &1.status,
-        user_id: &1.user_id,
-        promotion_id: &1.promotion_apply_id,
-        inserted_at: &1.inserted_at,
-        products_orders: Enum.map(&1.product_transactions, fn pt ->
+      Enum.map(transactions, fn transaction ->
+        promotion_discount_as_percent =
+          transaction.discount_as_percent_applied ||
+            case transaction.promotion_apply do
+              %{discount_as_percent: discount_as_percent} -> discount_as_percent
+              _ -> nil
+            end
+
+        employee_name =
+          case transaction.employee do
+            %{name: name} -> name
+            _ -> nil
+          end
+
+        %{
+          id: transaction.id,
+          invoice_id: transaction.invoice_id,
+          bill_price_as_usd: transaction.bill_price_as_usd,
+          bill_price_before_discount_as_usd: transaction.bill_price_before_discount_as_usd,
+          bill_price_after_discount_as_usd: transaction.bill_price_after_discount_as_usd,
+          discount_amount_as_usd: transaction.discount_amount_as_usd,
+          promotion_discount_as_percent: promotion_discount_as_percent,
+          table_number: transaction.seating_table.table_number,
+          employee: employee_name,
+          status: transaction.status,
+          user_id: transaction.user_id,
+          promotion_id: transaction.promotion_apply_id,
+          inserted_at: transaction.inserted_at,
+          products_orders: Enum.map(transaction.product_transactions, fn pt ->
           %{
             product_id: pt.product_id,
             name: pt.product.name,
@@ -45,8 +59,9 @@ defmodule LangkaOrderManagementWeb.ListTransaction do
             ice_level: pt.ice_level,
             order_note: pt.order_note
           }
-        end)
-      })
+          end)
+        }
+      end)
     end
   end
 end

@@ -22,6 +22,31 @@ defmodule LangkaOrderManagementWeb.GetTransaction do
 
   defmodule View do
     def render("get_transaction.json", %{data: transaction}) do
+      promotion_discount_as_percent =
+        transaction.discount_as_percent_applied ||
+          case transaction.promotion_apply do
+            %{discount_as_percent: discount_as_percent} -> discount_as_percent
+            _ -> nil
+          end
+
+      user_name =
+        case transaction.user do
+          %{username: username} -> username
+          _ -> nil
+        end
+
+      user_phone =
+        case transaction.user do
+          %{phone_number: phone_number} -> phone_number
+          _ -> nil
+        end
+
+      table_number =
+        case transaction.seating_table do
+          %{table_number: number} -> number
+          _ -> nil
+        end
+
       %{
         id: transaction.id,
         invoice_id: transaction.invoice_id,
@@ -29,11 +54,11 @@ defmodule LangkaOrderManagementWeb.GetTransaction do
         bill_price_before_discount_as_usd: transaction.bill_price_before_discount_as_usd,
         bill_price_after_discount_as_usd: transaction.bill_price_after_discount_as_usd,
         discount_amount_as_usd: transaction.discount_amount_as_usd,
-        promotion_discount_as_percent: transaction.discount_as_percent_applied || (transaction.promotion_apply && transaction.promotion_apply.discount_as_percent),
-        table_number: transaction.seating_table.table_number,
+        promotion_discount_as_percent: promotion_discount_as_percent,
+        table_number: table_number,
         user_id: transaction.user_id,
-        user_name: transaction.user.username,
-        user_phone: transaction.user.phone_number,
+        user_name: user_name,
+        user_phone: user_phone,
         promotion_id: transaction.promotion_apply_id,
         status: transaction.status,
         inserted_at: transaction.inserted_at,
