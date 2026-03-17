@@ -3,7 +3,7 @@ defmodule LangkaOrderManagementWeb.Router do
   alias LangkaOrderManagementWeb.FormRequest
 
   pipeline :api do
-    plug :accepts, ["json"]
+    plug :accepts, ["json", "sse"]
     plug LangkaOrderManagementWeb.AuthPlug
   end
 
