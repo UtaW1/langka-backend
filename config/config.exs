@@ -41,6 +41,10 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
+config :mime, :types, %{
+  "text/event-stream" => ["sse"]
+}
+
 config :cors_plug,
   headers: ["x-api-key", "authorization"],
   expose: ["x-paging-total-count"]
