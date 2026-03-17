@@ -16,7 +16,7 @@ services:
       - langka_net
 
   frontend:
-    image: kuulz/langka-frontend:1.5.1
+    image: kuulz/langka-frontend:1.5.2
     container_name: frontend
     restart: unless-stopped
     expose:
