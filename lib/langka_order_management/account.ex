@@ -35,15 +35,32 @@ defmodule LangkaOrderManagement.Account do
   end
 
   def list_all_users(filters) do
-    query =
+    base_query =
       User
       |> where([u], u.role == ^"customer")
       |> ContextUtil.list(filters)
 
-    users = Repo.all(query)
+    users =
+      base_query
+      |> join(
+        :left,
+        [u],
+        t in Transaction,
+        on: t.user_id == u.id and t.status == ^"completed"
+      )
+      |> group_by([u, _t], [u.id, u.username, u.phone_number, u.inserted_at])
+      |> select([u, t], %{
+        id: u.id,
+        username: u.username,
+        phone_number: u.phone_number,
+        inserted_at: u.inserted_at,
+        total_completed_transactions: count(t.id),
+        total_revenue_generated: fragment("COALESCE(?, 0)", sum(t.bill_price_as_usd))
+      })
+      |> Repo.all()
 
     count =
-      query
+      base_query
       |> exclude(:order_by)
       |> exclude(:select)
       |> select([u], count(u.id))

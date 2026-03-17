@@ -24,7 +24,9 @@ defmodule LangkaOrderManagementWeb.ListUser do
         id: &1.id,
         username: &1.username,
         phone_number: &1.phone_number,
-        inserted_at: &1.inserted_at
+        inserted_at: &1.inserted_at,
+        total_completed_transactions: &1.total_completed_transactions,
+        total_revenue_generated: &1.total_revenue_generated
       })
     end
   end
