@@ -68,11 +68,12 @@ defmodule LangkaOrderManagement.Promotion do
       :promotion,
       Promotion.retire_changeset(promotion, %{status: "retired", removed_datetime: DateTime.truncate(DateTime.utc_now(), :second)})
     )
-    |> Multi.delete_all(
+    |> Multi.update_all(
       :retired_progression_trackers,
       from(upt in UserPromotionTracker,
         where: upt.promotion_id == ^promotion.id and not upt.used_up
-      )
+      ),
+      set: [used_up: true]
     )
     |> Repo.transact()
     |> case do
@@ -111,6 +112,46 @@ defmodule LangkaOrderManagement.Promotion do
     |> order_by(desc: :inserted_at)
     |> limit(1)
     |> Repo.one()
+  end
+
+  def list_active_promotion_usage_metrics do
+    Promotion
+    |> where([promotion], promotion.status == ^"active")
+    |> join(:left, [promotion], transaction in Transaction, on: transaction.promotion_apply_id == promotion.id)
+    |> group_by([promotion, _transaction], [promotion.id, promotion.transaction_count_to_get_discount, promotion.discount_as_percent])
+    |> select([promotion, transaction], %{
+      promotion_id: promotion.id,
+      transaction_count_to_get_discount: promotion.transaction_count_to_get_discount,
+      discount_as_percent: promotion.discount_as_percent,
+      total_applied_transactions: count(transaction.id)
+    })
+    |> order_by([promotion, _transaction], [desc: promotion.id])
+    |> Repo.all()
+  end
+
+  def list_active_promotion_progression_metrics do
+    UserPromotionTracker
+    |> join(:inner, [tracker], promotion in assoc(tracker, :promotion))
+    |> join(:inner, [tracker, _promotion], user in assoc(tracker, :user))
+    |> where([tracker, promotion, user], not tracker.used_up and promotion.status == ^"active" and user.role == ^"customer")
+    |> select([tracker, promotion, user], %{
+      user_id: user.id,
+      username: user.username,
+      phone_number: user.phone_number,
+      promotion_id: promotion.id,
+      discount_as_percent: promotion.discount_as_percent,
+      transaction_count_to_get_discount: promotion.transaction_count_to_get_discount,
+      current_progress_count: tracker.transaction_count,
+      remaining_orders_before_discount:
+        fragment(
+          "GREATEST((? - ?), 0)",
+          promotion.transaction_count_to_get_discount,
+          tracker.transaction_count
+        ),
+      will_have_discount_on_next_order: tracker.transaction_count >= promotion.transaction_count_to_get_discount
+    })
+    |> order_by([tracker, promotion, user], [asc: user.username, desc: promotion.id])
+    |> Repo.all()
   end
 
   def resolve_promotion_for_transaction(user_id) do
@@ -229,7 +270,7 @@ defmodule LangkaOrderManagement.Promotion do
       where: p.status != ^"active",
       where: not upt.used_up
     )
-    |> Repo.delete_all()
+    |> Repo.update_all(set: [used_up: true])
 
     :ok
   end

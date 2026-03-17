@@ -33,8 +33,11 @@ defmodule LangkaOrderManagementWeb.Router do
     get "/metrics/product_monthly", FormRequest, LangkaOrderManagementWeb.ListProductMonthlyMetric
     get "/metrics/table_monthly", FormRequest, LangkaOrderManagementWeb.ListTableMonthlyMetric
     get "/metrics/employee_monthly", FormRequest, LangkaOrderManagementWeb.ListEmployeeMonthlyMetric
+    get "/metrics/promotion_usage", FormRequest, LangkaOrderManagementWeb.ListPromotionUsageMetric
+    get "/metrics/promotion_progression", FormRequest, LangkaOrderManagementWeb.ListPromotionProgressionMetric
 
     get "/export_transaction", FormRequest, LangkaOrderManagementWeb.ExportTransaction
+    get "/export_user", FormRequest, LangkaOrderManagementWeb.ExportUser
 
     scope "/products" do
       post "/", FormRequest, LangkaOrderManagementWeb.CreateProduct
