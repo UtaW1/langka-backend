@@ -13,6 +13,8 @@ defmodule LangkaOrderManagement.Promotion.UserPromotionTracker do
 
     belongs_to :user, User, type: :binary_id
     belongs_to :promotion, Promotion
+
+    timestamps()
   end
 
   def changeset(user_promotion_tracker, attrs) do
