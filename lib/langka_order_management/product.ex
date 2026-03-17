@@ -35,9 +35,14 @@ defmodule LangkaOrderManagement.Product do
   end
 
   def delete_product_category(%ProductCategory{} = category) do
-    category
-    |> ProductCategory.remove_changeset(%{removed_datetime: DateTime.truncate(DateTime.utc_now(), :second), removed_reason: "admin removed"})
-    |> Repo.update()
+    Repo.transaction(fn ->
+      from(p in Product, where: p.product_category_id == ^category.id)
+      |> Repo.update_all(set: [removed_datetime: DateTime.truncate(DateTime.utc_now(), :second)])
+
+      category
+      |> ProductCategory.remove_changeset(%{removed_datetime: DateTime.truncate(DateTime.utc_now(), :second), removed_reason: "admin removed"})
+      |> Repo.update()
+    end)
   end
 
   def change_product_category(%ProductCategory{} = category, attrs \\ %{}) do
