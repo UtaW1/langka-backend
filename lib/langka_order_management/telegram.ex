@@ -115,4 +115,76 @@ defmodule LangkaOrderManagement.Telegram do
       String.trim_trailing(text) <> "\n" <> new_line
     end
   end
+
+  def build_order_result_message(transaction, action, employee_name \\ nil) when action in [:completed, :cancelled] do
+    items_list =
+      transaction.product_transactions
+      |> Enum.map_join("\n", fn product_transaction ->
+        item_line = "- #{product_transaction.product.name} (x#{product_transaction.quantity})"
+
+        customizations =
+          [
+            if(product_transaction.sugar_level, do: "sugar: #{product_transaction.sugar_level}%", else: nil),
+            if(product_transaction.ice_level, do: "ice: #{product_transaction.ice_level}", else: nil),
+            if(product_transaction.order_note, do: "note: #{product_transaction.order_note}", else: nil)
+          ]
+          |> Enum.reject(&is_nil/1)
+
+        if customizations == [] do
+          item_line
+        else
+          item_line <> "\n  customizations: " <> Enum.join(customizations, " | ")
+        end
+      end)
+
+    customer_name =
+      case transaction.user do
+        %{username: username} -> username
+        _ -> "Unknown"
+      end
+
+    customer_phone =
+      case transaction.user do
+        %{phone_number: phone_number} -> phone_number
+        _ -> "Unknown"
+      end
+
+    table_label =
+      case transaction.seating_table do
+        %{table_number: table_number} -> table_number
+        _ -> transaction.seating_table_id
+      end
+
+    actor_line =
+      case employee_name do
+        nil -> "Handled by: N/A"
+        "" -> "Handled by: N/A"
+        name -> "Handled by: #{name}"
+      end
+
+    action_label = if action == :completed, do: "COMPLETED", else: "CANCELLED"
+
+    total_before = Map.get(transaction, :bill_price_before_discount_as_usd) || transaction.bill_price_as_usd
+    total_after = Map.get(transaction, :bill_price_after_discount_as_usd) || transaction.bill_price_as_usd
+
+    discount_line =
+      if transaction.discount_amount_as_usd && Decimal.gt?(transaction.discount_amount_as_usd, Decimal.new("0")) do
+        "Discount: #{transaction.discount_as_percent_applied}% (-$#{transaction.discount_amount_as_usd})"
+      else
+        "Discount: none"
+      end
+
+    """
+    ORDER #{action_label}
+    Order ID: #{transaction.id}
+    Customer: #{customer_name} (#{customer_phone})
+    Table: #{table_label}
+    #{actor_line}
+    Items:
+    #{items_list}
+    Total before discount: $#{total_before}
+    #{discount_line}
+    Total after discount: $#{total_after}
+    """
+  end
 end

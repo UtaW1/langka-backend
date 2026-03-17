@@ -67,7 +67,7 @@ defmodule LangkaOrderManagementWeb.TelegramWebhook do
          {:ok, updated_transaction} <- Account.complete_order_on_webhook_callback(transaction)
     do
       employee_name = updated_transaction.employee && updated_transaction.employee.name
-      completion_msg = if employee_name, do: "Order #{id} is completed by #{employee_name}!", else: "Order #{id} is completed!"
+      completion_msg = Telegram.build_order_result_message(transaction, :completed, employee_name)
 
       TransactionStream.publish_event(updated_transaction.id, :completed, %{
         status: updated_transaction.status,
@@ -99,7 +99,7 @@ defmodule LangkaOrderManagementWeb.TelegramWebhook do
          {:ok, updated_transaction} <- Account.cancel_order_on_webhook_callback(transaction)
     do
       employee_name = updated_transaction.employee && updated_transaction.employee.name
-      cancel_msg = if employee_name, do: "Order #{id} is cancelled by #{employee_name}!", else: "Order #{id} is cancelled!"
+      cancel_msg = Telegram.build_order_result_message(transaction, :cancelled, employee_name)
 
       TransactionStream.publish_event(updated_transaction.id, :cancelled, %{
         status: updated_transaction.status,
