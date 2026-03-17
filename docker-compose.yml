@@ -16,7 +16,7 @@ services:
       - langka_net
 
   frontend:
-    image: kuulz/langka-frontend:1.0.0
+    image: kuulz/langka-frontend:1.5.1
     container_name: frontend
     restart: unless-stopped
     expose:
@@ -25,7 +25,7 @@ services:
       - langka_net
 
   app:
-    image: kuulz/langka-order-management:1.0.0
+    image: kuulz/langka-order-management:1.5.10
     container_name: app
     env_file: .env
     depends_on:
