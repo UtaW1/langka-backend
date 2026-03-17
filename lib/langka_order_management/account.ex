@@ -20,7 +20,7 @@ defmodule LangkaOrderManagement.Account do
       Transaction
       |> where([t], t.status == ^"completed")
       |> ContextUtil.list(filters)
-      |> preload([t], [product_transactions: :product, seating_table: []])
+      |> preload([t], [product_transactions: :product, seating_table: [], employee: []])
 
     transactions = Repo.all(query)
 
@@ -51,6 +51,36 @@ defmodule LangkaOrderManagement.Account do
       |> Repo.one()
 
     {users, count}
+  end
+
+  def list_monthly_employee_transaction_metrics do
+    start_date = Date.beginning_of_month(Date.utc_today())
+    end_date = Date.end_of_month(Date.utc_today())
+
+    Transaction
+    |> join(:inner, [transaction], employee in assoc(transaction, :employee))
+    |> where([transaction, _employee], transaction.status in ^["completed", "cancelled"])
+    |> where(
+      [transaction, _employee],
+      type(transaction.inserted_at, :date) >= ^start_date and type(transaction.inserted_at, :date) <= ^end_date
+    )
+    |> group_by([_transaction, employee], [employee.id, employee.name])
+    |> select([transaction, employee], %{
+      employee_id: employee.id,
+      employee_name: employee.name,
+      completed_orders:
+        fragment(
+          "SUM(CASE WHEN ? = 'completed' THEN 1 ELSE 0 END)",
+          transaction.status
+        ),
+      cancelled_orders:
+        fragment(
+          "SUM(CASE WHEN ? = 'cancelled' THEN 1 ELSE 0 END)",
+          transaction.status
+        )
+    })
+    |> order_by([transaction, employee], [asc: employee.name])
+    |> Repo.all()
   end
 
   def list_transactions_for_export(args) do

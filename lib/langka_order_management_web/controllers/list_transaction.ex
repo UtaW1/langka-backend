@@ -25,6 +25,7 @@ defmodule LangkaOrderManagementWeb.ListTransaction do
         invoice_id: &1.invoice_id,
         bill_price_as_usd: &1.bill_price_as_usd,
         table_number: &1.seating_table.table_number,
+        employee: &1.employee.name,
         user_id: &1.user_id,
         promotion_id: &1.promotion_apply_id,
         inserted_at: &1.inserted_at,

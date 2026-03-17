@@ -32,6 +32,7 @@ defmodule LangkaOrderManagementWeb.Router do
     get "/list_user", FormRequest, LangkaOrderManagementWeb.ListUser
     get "/metrics/product_monthly", FormRequest, LangkaOrderManagementWeb.ListProductMonthlyMetric
     get "/metrics/table_monthly", FormRequest, LangkaOrderManagementWeb.ListTableMonthlyMetric
+    get "/metrics/employee_monthly", FormRequest, LangkaOrderManagementWeb.ListEmployeeMonthlyMetric
 
     get "/export_transaction", FormRequest, LangkaOrderManagementWeb.ExportTransaction
 
