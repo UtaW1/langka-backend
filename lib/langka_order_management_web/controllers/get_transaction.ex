@@ -28,6 +28,8 @@ defmodule LangkaOrderManagementWeb.GetTransaction do
         bill_price_as_usd: transaction.bill_price_as_usd,
         table_number: transaction.seating_table.table_number,
         user_id: transaction.user_id,
+        user_name: transaction.user.username,
+        user_phone: transaction.user.phone_number,
         promotion_id: transaction.promotion_apply_id,
         status: transaction.status,
         inserted_at: transaction.inserted_at,

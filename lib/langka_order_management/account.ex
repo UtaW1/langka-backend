@@ -122,7 +122,7 @@ defmodule LangkaOrderManagement.Account do
   def get_transaction_by_id(id) do
     Transaction
     |> where([t], t.id == ^id)
-    |> preload([t], [:employee, product_transactions: :product, seating_table: []])
+    |> preload([t], [:employee, :user, product_transactions: :product, seating_table: []])
     |> Repo.one()
   end
 
