@@ -25,6 +25,7 @@ defmodule LangkaOrderManagementWeb.ListEmployeeMonthlyMetric do
         completed_orders: &1.completed_orders,
         cancelled_orders: &1.cancelled_orders
       })
+      |> Enum.sort_by(& &1.completed_orders, :desc)
     end
   end
 end
