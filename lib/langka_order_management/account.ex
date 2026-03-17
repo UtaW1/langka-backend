@@ -6,6 +6,7 @@ defmodule LangkaOrderManagement.Account do
   alias LangkaOrderManagement.{
     Repo,
     Account.User,
+    Employee.Employee,
     Promotion,
     Promotion.UserPromotionTracker,
     Payment,
@@ -73,29 +74,33 @@ defmodule LangkaOrderManagement.Account do
     start_date = Date.beginning_of_month(Date.utc_today())
     end_date = Date.end_of_month(Date.utc_today())
 
-    Transaction
-    |> join(:inner, [transaction], employee in assoc(transaction, :employee))
-    |> where([transaction, _employee], transaction.status in ^["completed", "cancelled"])
-    |> where(
-      [transaction, _employee],
-      type(transaction.inserted_at, :date) >= ^start_date and type(transaction.inserted_at, :date) <= ^end_date
+    Employee
+    |> join(
+      :left,
+      [employee],
+      transaction in Transaction,
+      on:
+        transaction.employee_id == employee.id and
+          transaction.status in ^["completed", "cancelled"] and
+          type(transaction.inserted_at, :date) >= ^start_date and
+          type(transaction.inserted_at, :date) <= ^end_date
     )
-    |> group_by([_transaction, employee], [employee.id, employee.name])
-    |> select([transaction, employee], %{
+    |> group_by([employee, _transaction], [employee.id, employee.name])
+    |> select([employee, transaction], %{
       employee_id: employee.id,
       employee_name: employee.name,
       completed_orders:
         fragment(
-          "SUM(CASE WHEN ? = 'completed' THEN 1 ELSE 0 END)",
+          "COALESCE(SUM(CASE WHEN ? = 'completed' THEN 1 ELSE 0 END), 0)",
           transaction.status
         ),
       cancelled_orders:
         fragment(
-          "SUM(CASE WHEN ? = 'cancelled' THEN 1 ELSE 0 END)",
+          "COALESCE(SUM(CASE WHEN ? = 'cancelled' THEN 1 ELSE 0 END), 0)",
           transaction.status
         )
     })
-    |> order_by([transaction, employee], [asc: employee.name])
+    |> order_by([employee, _transaction], [asc: employee.name])
     |> Repo.all()
   end
 
