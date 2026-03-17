@@ -19,6 +19,23 @@ defmodule LangkaOrderManagement.Promotion do
 
   def get_promotion(id), do: Repo.get(Promotion, id)
 
+  def get_promotion_with_transactions(id) do
+    case get_promotion(id) do
+      nil ->
+        nil
+
+      promotion ->
+        transactions =
+          Transaction
+          |> where([transaction], transaction.promotion_apply_id == ^id)
+          |> order_by([transaction], [desc: transaction.inserted_at])
+          |> preload([transaction], [:user, :employee, :seating_table, product_transactions: :product])
+          |> Repo.all()
+
+        %{promotion: promotion, transactions: transactions}
+    end
+  end
+
   def update_promotion(%Promotion{} = promotion, args) do
     promotion
     |> Promotion.changeset(args)
@@ -118,7 +135,6 @@ defmodule LangkaOrderManagement.Promotion do
     {start_datetime, end_datetime} = resolve_metric_datetime_range(filters)
 
     Promotion
-    |> where([promotion], promotion.status == ^"active")
     |> join(
       :left,
       [promotion],
@@ -128,11 +144,15 @@ defmodule LangkaOrderManagement.Promotion do
           transaction.inserted_at >= ^start_datetime and
           transaction.inserted_at <= ^end_datetime
     )
-    |> group_by([promotion, _transaction], [promotion.id, promotion.transaction_count_to_get_discount, promotion.discount_as_percent])
+    |> group_by([
+      promotion,
+      _transaction
+    ], [promotion.id, promotion.transaction_count_to_get_discount, promotion.discount_as_percent, promotion.status])
     |> select([promotion, transaction], %{
       promotion_id: promotion.id,
       transaction_count_to_get_discount: promotion.transaction_count_to_get_discount,
       discount_as_percent: promotion.discount_as_percent,
+      status: promotion.status,
       total_applied_transactions: count(transaction.id)
     })
     |> order_by([promotion, _transaction], [desc: promotion.id])
