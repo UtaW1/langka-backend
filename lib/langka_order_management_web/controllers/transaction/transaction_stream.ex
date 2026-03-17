@@ -1,6 +1,7 @@
 defmodule LangkaOrderManagementWeb.TransactionStream do
   use LangkaOrderManagementWeb, :controller
   require Logger
+  alias LangkaOrderManagement.Account
 
   @topic "transaction_updates"
 
@@ -44,12 +45,104 @@ defmodule LangkaOrderManagementWeb.TransactionStream do
     conn = send_chunked(conn, 200)
 
     with {:ok, conn} <- chunk(conn, "retry: 3000\n\n"),
-         {:ok, conn} <- chunk(conn, ": connected to transaction stream\n\n") do
+         {:ok, conn} <- chunk(conn, ": connected to transaction stream\n\n"),
+         {:ok, conn} <- maybe_send_initial_state(conn, transaction_id) do
       stream_loop(conn, transaction_id)
     else
       _ -> conn
     end
   end
+
+  defp maybe_send_initial_state(conn, transaction_id) do
+    case Account.get_transaction_by_id(transaction_id) do
+      nil ->
+        {:ok, conn}
+
+      transaction ->
+        {event_type, event_data} = initial_event_payload(transaction)
+
+        case encode_event(event_type, event_data) do
+          {:ok, encoded} -> chunk(conn, encoded)
+          _ -> {:ok, conn}
+        end
+    end
+  end
+
+  defp initial_event_payload(%{status: "completed", employee_id: employee_id, employee: employee, id: id}) do
+    employee_name = employee_name(employee)
+
+    {
+      :completed,
+      %{
+        status: "completed",
+        message: completion_message(id, employee_name),
+        employee_id: employee_id,
+        employee_name: employee_name,
+        transaction_id: id
+      }
+    }
+  end
+
+  defp initial_event_payload(%{status: "cancelled", employee_id: employee_id, employee: employee, id: id}) do
+    employee_name = employee_name(employee)
+
+    {
+      :cancelled,
+      %{
+        status: "cancelled",
+        message: cancel_message(id, employee_name),
+        employee_id: employee_id,
+        employee_name: employee_name,
+        transaction_id: id
+      }
+    }
+  end
+
+  defp initial_event_payload(%{status: "pending", employee_id: employee_id, employee: employee, id: id}) when not is_nil(employee_id) do
+    employee_name = employee_name(employee)
+
+    {
+      :assigned,
+      %{
+        status: "pending",
+        message: "#{employee_name} is now preparing your order",
+        employee_id: employee_id,
+        employee_name: employee_name,
+        transaction_id: id
+      }
+    }
+  end
+
+  defp initial_event_payload(%{status: "pending", id: id}) do
+    {
+      :queued,
+      %{
+        status: "pending",
+        message: "Your order is in queue",
+        transaction_id: id
+      }
+    }
+  end
+
+  defp initial_event_payload(%{status: status, id: id}) do
+    {
+      :status,
+      %{
+        status: status,
+        message: "Order status is #{status}",
+        transaction_id: id
+      }
+    }
+  end
+
+  defp employee_name(%{name: name}) when is_binary(name), do: name
+  defp employee_name(_), do: nil
+
+  defp completion_message(transaction_id, nil), do: "Order #{transaction_id} is completed!"
+  defp completion_message(transaction_id, employee_name), do: "Order #{transaction_id} is completed by #{employee_name}!"
+
+  defp cancel_message(transaction_id, nil), do: "Order #{transaction_id} is cancelled!"
+  defp cancel_message(transaction_id, employee_name), do: "Order #{transaction_id} is cancelled by #{employee_name}!"
 
   defp stream_loop(conn, transaction_id) do
     receive do
