@@ -20,6 +20,8 @@ defmodule LangkaOrderManagement.Account do
     query =
       Transaction
       |> ContextUtil.list(filters)
+      |> exclude(:order_by)
+      |> order_by([t], [desc: t.inserted_at, desc: t.id])
       |> preload([t], [product_transactions: :product, seating_table: [], employee: [], promotion_apply: []])
 
     transactions = Repo.all(query)
@@ -40,6 +42,8 @@ defmodule LangkaOrderManagement.Account do
       User
       |> where([u], u.role == ^"customer")
       |> ContextUtil.list(filters)
+      |> exclude(:order_by)
+      |> order_by([u], [desc: u.inserted_at, desc: u.id])
 
     users =
       base_query
