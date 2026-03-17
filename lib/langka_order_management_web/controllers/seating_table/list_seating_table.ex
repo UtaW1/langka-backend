@@ -1,5 +1,6 @@
 defmodule LangkaOrderManagementWeb.ListSeatingTable do
   alias LangkaOrderManagement.SeatingTable
+  alias LangkaOrderManagementWeb.ControllerUtils
 
   def rules(_) do
     %{

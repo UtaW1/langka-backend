@@ -70,9 +70,8 @@ defmodule LangkaOrderManagement.Account do
     {users, count}
   end
 
-  def list_monthly_employee_transaction_metrics do
-    start_date = Date.beginning_of_month(Date.utc_today())
-    end_date = Date.end_of_month(Date.utc_today())
+  def list_monthly_employee_transaction_metrics(filters \\ %{}) do
+    {start_datetime, end_datetime} = resolve_metric_datetime_range(filters)
 
     Employee
     |> join(
@@ -82,8 +81,8 @@ defmodule LangkaOrderManagement.Account do
       on:
         transaction.employee_id == employee.id and
           transaction.status in ^["completed", "cancelled"] and
-          type(transaction.inserted_at, :date) >= ^start_date and
-          type(transaction.inserted_at, :date) <= ^end_date
+          transaction.inserted_at >= ^start_datetime and
+          transaction.inserted_at <= ^end_datetime
     )
     |> group_by([employee, _transaction], [employee.id, employee.name])
     |> select([employee, transaction], %{
@@ -102,6 +101,24 @@ defmodule LangkaOrderManagement.Account do
     })
     |> order_by([employee, _transaction], [asc: employee.name])
     |> Repo.all()
+  end
+
+  defp resolve_metric_datetime_range(filters) do
+    start_datetime =
+      Map.get_lazy(filters, "start_datetime", fn ->
+        Date.utc_today()
+        |> Date.beginning_of_month()
+        |> DateTime.new!(~T[00:00:00], "Etc/UTC")
+      end)
+
+    end_datetime =
+      Map.get_lazy(filters, "end_datetime", fn ->
+        Date.utc_today()
+        |> Date.end_of_month()
+        |> DateTime.new!(~T[23:59:59], "Etc/UTC")
+      end)
+
+    {start_datetime, end_datetime}
   end
 
   def list_transactions_for_export(args) do

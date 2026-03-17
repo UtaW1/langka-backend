@@ -1,10 +1,16 @@
 defmodule LangkaOrderManagementWeb.ListPromotionProgressionMetric do
   alias LangkaOrderManagement.Promotion
+  alias LangkaOrderManagementWeb.ControllerUtils
 
-  def rules(_), do: %{}
+  def rules(_) do
+    %{
+      "start_datetime" => [required: false, nullable: true, custom: &ControllerUtils.validate_iso8601_datetime/1],
+      "end_datetime" => [required: false, nullable: true, custom: &ControllerUtils.validate_iso8601_datetime/1]
+    }
+  end
 
-  def perform(conn, _args) do
-    metrics = Promotion.list_active_promotion_progression_metrics()
+  def perform(conn, args) do
+    metrics = Promotion.list_active_promotion_progression_metrics(args)
 
     conn
     |> Phoenix.Controller.put_view(__MODULE__.View)

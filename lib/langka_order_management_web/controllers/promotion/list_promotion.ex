@@ -1,5 +1,6 @@
 defmodule LangkaOrderManagementWeb.ListPromotion do
   alias LangkaOrderManagement.Promotion
+  alias LangkaOrderManagementWeb.ControllerUtils
 
   def rules(_) do
     %{

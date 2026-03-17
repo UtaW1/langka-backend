@@ -114,10 +114,20 @@ defmodule LangkaOrderManagement.Promotion do
     |> Repo.one()
   end
 
-  def list_active_promotion_usage_metrics do
+  def list_active_promotion_usage_metrics(filters \\ %{}) do
+    {start_datetime, end_datetime} = resolve_metric_datetime_range(filters)
+
     Promotion
     |> where([promotion], promotion.status == ^"active")
-    |> join(:left, [promotion], transaction in Transaction, on: transaction.promotion_apply_id == promotion.id)
+    |> join(
+      :left,
+      [promotion],
+      transaction in Transaction,
+      on:
+        transaction.promotion_apply_id == promotion.id and
+          transaction.inserted_at >= ^start_datetime and
+          transaction.inserted_at <= ^end_datetime
+    )
     |> group_by([promotion, _transaction], [promotion.id, promotion.transaction_count_to_get_discount, promotion.discount_as_percent])
     |> select([promotion, transaction], %{
       promotion_id: promotion.id,
@@ -129,11 +139,20 @@ defmodule LangkaOrderManagement.Promotion do
     |> Repo.all()
   end
 
-  def list_active_promotion_progression_metrics do
+  def list_active_promotion_progression_metrics(filters \\ %{}) do
+    {start_datetime, end_datetime} = resolve_metric_datetime_range(filters)
+
     UserPromotionTracker
     |> join(:inner, [tracker], promotion in assoc(tracker, :promotion))
     |> join(:inner, [tracker, _promotion], user in assoc(tracker, :user))
-    |> where([tracker, promotion, user], not tracker.used_up and promotion.status == ^"active" and user.role == ^"customer")
+    |> where(
+      [tracker, promotion, user],
+      not tracker.used_up and
+        promotion.status == ^"active" and
+        user.role == ^"customer" and
+        tracker.inserted_at >= ^start_datetime and
+        tracker.inserted_at <= ^end_datetime
+    )
     |> select([tracker, promotion, user], %{
       user_id: user.id,
       username: user.username,
@@ -152,6 +171,24 @@ defmodule LangkaOrderManagement.Promotion do
     })
     |> order_by([tracker, promotion, user], [asc: user.username, desc: promotion.id])
     |> Repo.all()
+  end
+
+  defp resolve_metric_datetime_range(filters) do
+    start_datetime =
+      Map.get_lazy(filters, "start_datetime", fn ->
+        Date.utc_today()
+        |> Date.beginning_of_month()
+        |> DateTime.new!(~T[00:00:00], "Etc/UTC")
+      end)
+
+    end_datetime =
+      Map.get_lazy(filters, "end_datetime", fn ->
+        Date.utc_today()
+        |> Date.end_of_month()
+        |> DateTime.new!(~T[23:59:59], "Etc/UTC")
+      end)
+
+    {start_datetime, end_datetime}
   end
 
   def resolve_promotion_for_transaction(user_id) do

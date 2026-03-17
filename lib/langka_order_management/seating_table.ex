@@ -76,14 +76,13 @@ defmodule LangkaOrderManagement.SeatingTable do
     {tables, count}
   end
 
-  def list_monthly_table_usage_metrics do
-    start_date = Date.beginning_of_month(Date.utc_today())
-    end_date = Date.end_of_month(Date.utc_today())
+  def list_monthly_table_usage_metrics(filters \\ %{}) do
+    {start_datetime, end_datetime} = resolve_metric_datetime_range(filters)
 
     Transaction
     |> join(:inner, [t], table in assoc(t, :seating_table))
     |> where([t, _table], t.status == ^"completed")
-    |> where([t, _table], type(t.inserted_at, :date) >= ^start_date and type(t.inserted_at, :date) <= ^end_date)
+    |> where([t, _table], t.inserted_at >= ^start_datetime and t.inserted_at <= ^end_datetime)
     |> group_by([_t, table], [table.id, table.table_number])
     |> select([t, table], %{
       seating_table_id: table.id,
@@ -92,5 +91,23 @@ defmodule LangkaOrderManagement.SeatingTable do
     })
     |> order_by([t, table], [desc: count(t.id), asc: table.table_number])
     |> Repo.all()
+  end
+
+  defp resolve_metric_datetime_range(filters) do
+    start_datetime =
+      Map.get_lazy(filters, "start_datetime", fn ->
+        Date.utc_today()
+        |> Date.beginning_of_month()
+        |> DateTime.new!(~T[00:00:00], "Etc/UTC")
+      end)
+
+    end_datetime =
+      Map.get_lazy(filters, "end_datetime", fn ->
+        Date.utc_today()
+        |> Date.end_of_month()
+        |> DateTime.new!(~T[23:59:59], "Etc/UTC")
+      end)
+
+    {start_datetime, end_datetime}
   end
 end
