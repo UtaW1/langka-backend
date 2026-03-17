@@ -48,6 +48,7 @@ defmodule LangkaOrderManagementWeb.ListProduct do
         code: &1.product.code,
         inserted_at: &1.product.inserted_at,
         image_url: &1.product.image_url,
+        removed_datetime: &1.product.removed_datetime,
         categories: %{
           id: &1.product.product_category.id,
           name: &1.product.product_category.name,
