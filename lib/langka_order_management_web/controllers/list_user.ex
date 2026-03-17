@@ -31,6 +31,7 @@ defmodule LangkaOrderManagementWeb.ListUser do
         total_completed_transactions: &1.total_completed_transactions,
         total_revenue_generated: &1.total_revenue_generated
       })
+      |> Enum.sort_by(& &1.inserted_at, {:desc, NaiveDateTime})
     end
   end
 end

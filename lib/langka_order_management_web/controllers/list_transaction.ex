@@ -65,6 +65,7 @@ defmodule LangkaOrderManagementWeb.ListTransaction do
           end)
         }
       end)
+      |> Enum.sort_by(& &1.inserted_at, {:desc, NaiveDateTime})
     end
   end
 end
