@@ -164,6 +164,8 @@ defmodule LangkaOrderManagement.Product do
   end
 
   def list_product_categories_with_paging(filters) do
+    filters = Map.put(filters, "is_removed", "no")
+
     product_category_query =
       ProductCategory
       |> from(as: :pc)
