@@ -8,7 +8,9 @@ defmodule LangkaOrderManagementWeb.ListInventory do
       "page_size" => [required: true, cast: :integer, type: :integer, between: {2, 32}],
       "page_number" => [required: false, nullable: true, cast: :integer, type: :integer, min: 0],
       "cursor_id" => [required: false, nullable: true, cast: :integer, type: :integer, min: 0],
-      "is_removed" => [required: false, nullable: true, custom: &ControllerUtils.validate_boolean/1]
+      "is_removed" => [required: false, nullable: true, custom: &ControllerUtils.validate_boolean/1],
+      "start_datetime" => [required: false, nullable: true, custom: &ControllerUtils.validate_iso8601_datetime/1],
+      "end_datetime" => [required: false, nullable: true, custom: &ControllerUtils.validate_iso8601_datetime/1]
     }
   end
 
