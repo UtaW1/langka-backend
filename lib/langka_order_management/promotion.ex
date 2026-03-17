@@ -1,5 +1,6 @@
 defmodule LangkaOrderManagement.Promotion do
   import Ecto.Query, warn: false
+  alias Ecto.Multi
   alias LangkaOrderManagement.{Repo, ContextUtil}
 
   alias LangkaOrderManagement.{
@@ -9,6 +10,8 @@ defmodule LangkaOrderManagement.Promotion do
   }
   def get_promotion!(id), do: Repo.get!(Promotion, id)
   def create_promotion(attrs \\ %{}) do
+    attrs = Map.put_new(attrs, "status", "active")
+
     %Promotion{}
     |> Promotion.changeset(attrs)
     |> Repo.insert()
@@ -26,7 +29,9 @@ defmodule LangkaOrderManagement.Promotion do
     UserPromotionTracker
     |> where([upt], upt.user_id == ^user_id)
     |> where([upt], not upt.used_up)
-    |> order_by(desc: :id)
+    |> join(:inner, [upt], p in assoc(upt, :promotion))
+    |> where([_upt, p], p.status == ^"active")
+    |> order_by(asc: :id)
     |> limit(1)
     |> preload([upt], :promotion)
     |> Repo.one()
@@ -41,15 +46,9 @@ defmodule LangkaOrderManagement.Promotion do
   end
 
   def determine_promotion_apply(user_id) do
-    continous_promotion = get_a_user_latest_continous_promotion_for_transaction(user_id)
-
-    case continous_promotion do
-      %UserPromotionTracker{promotion: %Promotion{} = promotion, transaction_count: transaction_count} ->
-        if transaction_count >= promotion.transaction_count_to_get_discount do
-          promotion
-        else
-          nil
-        end
+    case resolve_promotion_for_transaction(user_id) do
+      %{promotion_apply: promotion} ->
+        promotion
 
       _ ->
         nil
@@ -64,9 +63,23 @@ defmodule LangkaOrderManagement.Promotion do
   end
 
   def retire_promotion(%Promotion{status: "active"} = promotion) do
-    promotion
-    |> Promotion.retire_changeset(%{status: "retired", removed_datetime: DateTime.truncate(DateTime.utc_now(), :second)})
-    |> Repo.update()
+    Multi.new()
+    |> Multi.update(
+      :promotion,
+      Promotion.retire_changeset(promotion, %{status: "retired", removed_datetime: DateTime.truncate(DateTime.utc_now(), :second)})
+    )
+    |> Multi.delete_all(
+      :retired_progression_trackers,
+      from(upt in UserPromotionTracker,
+        where: upt.promotion_id == ^promotion.id and not upt.used_up
+      )
+    )
+    |> Repo.transact()
+    |> case do
+      {:ok, %{promotion: retired_promotion}} -> {:ok, retired_promotion}
+      {:error, :promotion, reason, _changes} -> {:error, reason}
+      {:error, _step, reason, _changes} -> {:error, reason}
+    end
   end
 
   def retire_promotion(_), do: {:error, :promotion_in_unactive_state}
@@ -98,5 +111,66 @@ defmodule LangkaOrderManagement.Promotion do
     |> order_by(desc: :inserted_at)
     |> limit(1)
     |> Repo.one()
+  end
+
+  def resolve_promotion_for_transaction(user_id) do
+    cleanup_retired_progressions_for_user(user_id)
+
+    latest_active_promotion = get_latest_active_promotion_for_transaction()
+    current_progression = get_a_user_latest_continous_promotion_for_transaction(user_id)
+
+    case {current_progression, latest_active_promotion} do
+      {nil, nil} ->
+        %{promotion_apply: nil, promotion_tracker_args: nil}
+
+      {nil, %Promotion{} = latest} ->
+        %{
+          promotion_apply: nil,
+          promotion_tracker_args: %{
+            transaction_count: 1,
+            used_up: false,
+            user_id: user_id,
+            promotion_id: latest.id
+          }
+        }
+
+      {%UserPromotionTracker{promotion: %Promotion{} = promotion, transaction_count: transaction_count}, _latest} ->
+        if transaction_count >= promotion.transaction_count_to_get_discount do
+          %{
+            promotion_apply: promotion,
+            promotion_tracker_args: %{
+              transaction_count: transaction_count,
+              used_up: true,
+              user_id: user_id,
+              promotion_id: promotion.id
+            }
+          }
+        else
+          %{
+            promotion_apply: nil,
+            promotion_tracker_args: %{
+              transaction_count: transaction_count + 1,
+              used_up: false,
+              user_id: user_id,
+              promotion_id: promotion.id
+            }
+          }
+        end
+
+      _ ->
+        nil
+    end
+  end
+
+  defp cleanup_retired_progressions_for_user(user_id) do
+    from(upt in UserPromotionTracker,
+      join: p in assoc(upt, :promotion),
+      where: upt.user_id == ^user_id,
+      where: p.status != ^"active",
+      where: not upt.used_up
+    )
+    |> Repo.delete_all()
+
+    :ok
   end
 end

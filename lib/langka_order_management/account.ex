@@ -196,41 +196,12 @@ defmodule LangkaOrderManagement.Account do
     with {:ok, %User{} = user} <- get_or_create_user(name, phone_number) do
       user_id = user.id
 
-      promotion_apply = Promotion.determine_promotion_apply(user_id)
-      latest_promo = Promotion.get_latest_active_promotion_for_transaction()
-      user_lastest_continous_promo = Promotion.get_a_user_latest_continous_promotion_for_transaction(user_id)
+      %{
+        promotion_apply: promotion_apply,
+        promotion_tracker_args: promotion_tracker
+      } = Promotion.resolve_promotion_for_transaction(user_id)
 
       {final_price, enriched_products_orders, _discount_amount} = Payment.calculate_final_price(products_orders, promotion_apply)
-
-      promotion_tracker =
-        case {promotion_apply, user_lastest_continous_promo, latest_promo} do
-          {%Promotion.Promotion{}, %UserPromotionTracker{}, _} ->
-            %{
-              transaction_count: user_lastest_continous_promo.transaction_count,
-              used_up: true,
-              user_id: user_id,
-              promotion_id: user_lastest_continous_promo.promotion_id
-            }
-
-          {nil, nil, %Promotion.Promotion{}} ->
-            %{
-              transaction_count: 1,
-              used_up: false,
-              user_id: user_id,
-              promotion_id: latest_promo.id
-            }
-
-          {nil, %UserPromotionTracker{}, _} ->
-            %{
-              transaction_count: user_lastest_continous_promo.transaction_count + 1,
-              used_up: false,
-              user_id: user_id,
-              promotion_id: user_lastest_continous_promo.promotion_id
-            }
-
-          _ ->
-            nil
-        end
 
       transaction_args = %{
         status: "pending",
