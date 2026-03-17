@@ -12,6 +12,10 @@ defmodule LangkaOrderManagement.Account.Transaction do
     field :status, :string, default: "pending"
     field :invoice_id, :string
     field :bill_price_as_usd, :decimal
+    field :bill_price_before_discount_as_usd, :decimal
+    field :bill_price_after_discount_as_usd, :decimal
+    field :discount_amount_as_usd, :decimal
+    field :discount_as_percent_applied, :decimal
 
     belongs_to :user, User, type: :binary_id
     belongs_to :employee, Employee
@@ -26,7 +30,19 @@ defmodule LangkaOrderManagement.Account.Transaction do
 
   def changeset(transaction, attrs) do
     transaction
-    |> cast(attrs, [:status, :invoice_id, :bill_price_as_usd, :user_id, :employee_id, :seating_table_id, :promotion_apply_id])
+    |> cast(attrs, [
+      :status,
+      :invoice_id,
+      :bill_price_as_usd,
+      :bill_price_before_discount_as_usd,
+      :bill_price_after_discount_as_usd,
+      :discount_amount_as_usd,
+      :discount_as_percent_applied,
+      :user_id,
+      :employee_id,
+      :seating_table_id,
+      :promotion_apply_id
+    ])
     |> validate_required([:status, :bill_price_as_usd, :seating_table_id])
     |> validate_number(:bill_price_as_usd, greater_than_or_equal_to: 0)
     |> validate_inclusion(:status, ["pending", "cancelled"])

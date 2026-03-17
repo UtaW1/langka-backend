@@ -72,6 +72,10 @@ defmodule LangkaOrderManagementWeb.MakePendingOrder do
         invoice_id: trx.invoice_id,
         user_id: trx.user_id,
         bill_price_as_usd: trx.bill_price_as_usd,
+        bill_price_before_discount_as_usd: trx.bill_price_before_discount_as_usd,
+        bill_price_after_discount_as_usd: trx.bill_price_after_discount_as_usd,
+        discount_amount_as_usd: trx.discount_amount_as_usd,
+        discount_as_percent_applied: trx.discount_as_percent_applied,
         promotion_apply_id: trx.promotion_apply_id,
         products_orders: Enum.map(po, & %{
           id: &1["product_detail"].id,

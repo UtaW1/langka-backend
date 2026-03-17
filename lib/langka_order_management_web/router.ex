@@ -110,6 +110,7 @@ defmodule LangkaOrderManagementWeb.Router do
     post "/order", FormRequest, LangkaOrderManagementWeb.MakePendingOrder
 
     get "/promotion", FormRequest, LangkaOrderManagementWeb.GetActivePromotion
+    get "/promotion/preview", FormRequest, LangkaOrderManagementWeb.GetPromotionPreview
 
     get "/transaction/stream", LangkaOrderManagementWeb.TransactionStream, :stream
 

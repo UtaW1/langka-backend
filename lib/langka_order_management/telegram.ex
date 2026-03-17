@@ -53,6 +53,16 @@ defmodule LangkaOrderManagement.Telegram do
         name -> "Assigned: #{name}"
       end
 
+    discount_line =
+      if transaction.discount_amount_as_usd && Decimal.gt?(transaction.discount_amount_as_usd, Decimal.new("0")) do
+        "Discount: #{transaction.discount_as_percent_applied}% (-$#{transaction.discount_amount_as_usd})"
+      else
+        "Discount: none"
+      end
+
+    total_before = Map.get(transaction, :bill_price_before_discount_as_usd) || transaction.bill_price_as_usd
+    total_after = Map.get(transaction, :bill_price_after_discount_as_usd) || transaction.bill_price_as_usd
+
     """
       *NEW ORDER RECEIVED!*
       Customer: #{customer_name} (#{phone_number})
@@ -60,7 +70,9 @@ defmodule LangkaOrderManagement.Telegram do
       #{assigned_line}
       Items:
       #{items_list}
-      Total: $#{transaction.bill_price_as_usd}
+      Total before discount: $#{total_before}
+      #{discount_line}
+      Total after discount: $#{total_after}
     """
   end
 

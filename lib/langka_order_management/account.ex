@@ -19,7 +19,7 @@ defmodule LangkaOrderManagement.Account do
     query =
       Transaction
       |> ContextUtil.list(filters)
-      |> preload([t], [product_transactions: :product, seating_table: [], employee: []])
+      |> preload([t], [product_transactions: :product, seating_table: [], employee: [], promotion_apply: []])
 
     transactions = Repo.all(query)
 
@@ -119,10 +119,17 @@ defmodule LangkaOrderManagement.Account do
     |> Repo.one()
   end
 
+  def get_customer_by_phone_number(phone_number) do
+    User
+    |> where([u], u.role == ^"customer")
+    |> where([u], u.phone_number == ^phone_number)
+    |> Repo.one()
+  end
+
   def get_transaction_by_id(id) do
     Transaction
     |> where([t], t.id == ^id)
-    |> preload([t], [:employee, :user, product_transactions: :product, seating_table: []])
+    |> preload([t], [:employee, :user, :promotion_apply, product_transactions: :product, seating_table: []])
     |> Repo.one()
   end
 
@@ -201,13 +208,28 @@ defmodule LangkaOrderManagement.Account do
         promotion_tracker_args: promotion_tracker
       } = Promotion.resolve_promotion_for_transaction(user_id)
 
-      {final_price, enriched_products_orders, _discount_amount} = Payment.calculate_final_price(products_orders, promotion_apply)
+      {final_price, enriched_products_orders, discount_amount} = Payment.calculate_final_price(products_orders, promotion_apply)
+
+      bill_price_before_discount_as_usd =
+        Enum.reduce(enriched_products_orders, Decimal.new("0"), fn product_order, acc ->
+          Decimal.add(acc, product_order["total_price_as_usd"])
+        end)
+
+      discount_as_percent_applied =
+        case promotion_apply do
+          %Promotion.Promotion{discount_as_percent: discount_as_percent} -> discount_as_percent
+          _ -> nil
+        end
 
       transaction_args = %{
         status: "pending",
         invoice_id: args["invoice_id"],
         seating_table_id: args["seating_table_id"],
         bill_price_as_usd: final_price,
+        bill_price_before_discount_as_usd: bill_price_before_discount_as_usd,
+        bill_price_after_discount_as_usd: final_price,
+        discount_amount_as_usd: discount_amount,
+        discount_as_percent_applied: discount_as_percent_applied,
         user_id: user_id,
         promotion_apply_id: if(promotion_apply, do: promotion_apply.id, else: nil)
       }

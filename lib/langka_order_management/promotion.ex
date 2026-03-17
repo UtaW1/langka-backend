@@ -162,6 +162,66 @@ defmodule LangkaOrderManagement.Promotion do
     end
   end
 
+  def preview_next_order_discount(nil) do
+    latest_active_promotion = get_latest_active_promotion_for_transaction()
+
+    case latest_active_promotion do
+      nil ->
+        %{
+          will_have_discount_on_next_order: false,
+          current_progress_count: 0,
+          required_transaction_count: nil,
+          remaining_orders_before_discount: nil,
+          promotion: nil
+        }
+
+      %Promotion{} = promotion ->
+        %{
+          will_have_discount_on_next_order: false,
+          current_progress_count: 0,
+          required_transaction_count: promotion.transaction_count_to_get_discount,
+          remaining_orders_before_discount: promotion.transaction_count_to_get_discount,
+          promotion: promotion
+        }
+    end
+  end
+
+  def preview_next_order_discount(user_id) do
+    latest_active_promotion = get_latest_active_promotion_for_transaction()
+    current_progression = get_a_user_latest_continous_promotion_for_transaction(user_id)
+
+    case {current_progression, latest_active_promotion} do
+      {nil, nil} ->
+        %{
+          will_have_discount_on_next_order: false,
+          current_progress_count: 0,
+          required_transaction_count: nil,
+          remaining_orders_before_discount: nil,
+          promotion: nil
+        }
+
+      {nil, %Promotion{} = promotion} ->
+        %{
+          will_have_discount_on_next_order: false,
+          current_progress_count: 0,
+          required_transaction_count: promotion.transaction_count_to_get_discount,
+          remaining_orders_before_discount: promotion.transaction_count_to_get_discount,
+          promotion: promotion
+        }
+
+      {%UserPromotionTracker{promotion: %Promotion{} = promotion, transaction_count: transaction_count}, _latest} ->
+        remaining = max(promotion.transaction_count_to_get_discount - transaction_count, 0)
+
+        %{
+          will_have_discount_on_next_order: transaction_count >= promotion.transaction_count_to_get_discount,
+          current_progress_count: transaction_count,
+          required_transaction_count: promotion.transaction_count_to_get_discount,
+          remaining_orders_before_discount: remaining,
+          promotion: promotion
+        }
+    end
+  end
+
   defp cleanup_retired_progressions_for_user(user_id) do
     from(upt in UserPromotionTracker,
       join: p in assoc(upt, :promotion),
