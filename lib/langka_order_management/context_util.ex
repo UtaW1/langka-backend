@@ -78,6 +78,8 @@ defmodule LangkaOrderManagement.ContextUtil do
 
     filters
     |> Enum.reduce(query, fn
+      {_, value}, acc when value in [nil, ""] -> acc
+
       {"label", name}, query ->
         where(query, [x], ilike(x.name, ^"%#{name}%"))
 
@@ -92,6 +94,12 @@ defmodule LangkaOrderManagement.ContextUtil do
 
       {"is_removed", is_removed}, query ->
         where(query, [x], not is_nil(x.removed_datetime) == ^(is_removed == "yes"))
+
+      {"status", status}, query ->
+        where(query, [x], x.status == ^status)
+
+      {"employee_id", employee_id}, query ->
+        where(query, [x], x.employee_id == ^employee_id)
 
       _, query -> query
     end)

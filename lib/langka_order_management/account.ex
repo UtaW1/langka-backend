@@ -18,7 +18,6 @@ defmodule LangkaOrderManagement.Account do
   def list_all_transactions(filters) do
     query =
       Transaction
-      |> where([t], t.status == ^"completed")
       |> ContextUtil.list(filters)
       |> preload([t], [product_transactions: :product, seating_table: [], employee: []])
 
