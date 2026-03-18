@@ -11,11 +11,15 @@ defmodule LangkaOrderManagementWeb.ReinstateProduct do
 
   def perform(conn, %{"id" => id}) do
     with product when not is_nil(product) <- Product.get_product(id),
+         false <- Product.category_removed?(product),
          {:ok, _} <- Product.reinstate_product(product) do
       Plug.Conn.send_resp(conn, 204, "")
     else
       nil ->
         ControllerUtils.render_error(conn, 404, "404.json", "product not found", "")
+
+      true ->
+        ControllerUtils.render_error(conn, 422, "422.json", :product_category_removed, "you have to reinstate the category first")
 
       {:error, cs} ->
         conn

@@ -45,6 +45,12 @@ defmodule LangkaOrderManagement.Product do
     end)
   end
 
+  def reinstate_product_category(%ProductCategory{} = category) do
+    category
+    |> Ecto.Changeset.change(%{removed_datetime: nil, removed_reason: nil})
+    |> Repo.update()
+  end
+
   def change_product_category(%ProductCategory{} = category, attrs \\ %{}) do
     ProductCategory.changeset(category, attrs)
   end
@@ -118,6 +124,9 @@ defmodule LangkaOrderManagement.Product do
     |> Product.changeset(%{removed_datetime: nil})
     |> Repo.update()
   end
+
+  def category_removed?(%Product{product_category: %ProductCategory{removed_datetime: removed_datetime}}),
+    do: not is_nil(removed_datetime)
 
   def get_enriched_product_by_id(id) do
     product = get_product(id)

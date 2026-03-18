@@ -49,6 +49,7 @@ defmodule LangkaOrderManagementWeb.Router do
 
     scope "/categories" do
       post "/", FormRequest, LangkaOrderManagementWeb.CreateCategory
+      patch "/:id/reinstate", FormRequest, LangkaOrderManagementWeb.ReinstateCategory
 
       delete "/:id", FormRequest, LangkaOrderManagementWeb.DeleteCategory
     end
