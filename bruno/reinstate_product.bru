@@ -1,0 +1,15 @@
+meta {
+  name: reinstate_product
+  type: http
+  seq: 15
+}
+
+patch {
+  url: http://localhost:4000/api/admin/products/{{id}}/reinstate
+  body: none
+  auth: none
+}
+
+vars:pre-request {
+  id: 1
+}

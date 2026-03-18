@@ -113,6 +113,12 @@ defmodule LangkaOrderManagement.Product do
     |> Repo.update()
   end
 
+  def reinstate_product(%Product{} = product) do
+    product
+    |> Product.changeset(%{removed_datetime: nil})
+    |> Repo.update()
+  end
+
   def get_enriched_product_by_id(id) do
     product = get_product(id)
 

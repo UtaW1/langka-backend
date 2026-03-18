@@ -43,6 +43,7 @@ defmodule LangkaOrderManagementWeb.Router do
       post "/", FormRequest, LangkaOrderManagementWeb.CreateProduct
       get "/:id", FormRequest, LangkaOrderManagementWeb.GetProduct
       patch "/:id", FormRequest, LangkaOrderManagementWeb.UpdateProduct
+      patch "/:id/reinstate", FormRequest, LangkaOrderManagementWeb.ReinstateProduct
       delete "/:id", FormRequest, LangkaOrderManagementWeb.DeleteProduct
     end
 
